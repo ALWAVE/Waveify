@@ -1,14 +1,10 @@
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-WORKDIR /app
-EXPOSE 5000
-
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY . .
-RUN dotnet restore "Waveify.sln"
-RUN dotnet publish "Waveify.Web/Waveify.Web.csproj" -c Release -o /app/publish  
+COPY ./WaveifyWeb/. .   # Указываем путь к папке, где находятся исходники проекта
+RUN dotnet restore "WaveifyWeb.sln"
+RUN dotnet publish "WaveifyWeb/WaveifyWeb.csproj" -c Release -o /app/publish
 
-FROM base AS final
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
 COPY --from=build /app/publish .
-ENTRYPOINT ["dotnet", "Waveify.Web.dll"]  
+ENTRYPOINT ["dotnet", "WaveifyWeb.dll"]
