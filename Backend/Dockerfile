@@ -9,7 +9,7 @@ COPY . .
 RUN dotnet restore "WaveifyWeb/WaveifyWeb.sln"
 
 # Публикуем проект
-RUN dotnet publish "WaveifyWeb/WaveifyWeb/WaveifyWeb.csproj" -c Release -o /app/publish
+RUN dotnet publish "WaveifyWeb/WaveifyWeb.csproj" -c Release -o /app/publish
 
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
