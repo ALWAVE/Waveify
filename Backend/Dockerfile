@@ -1,6 +1,6 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY ./WaveifyWeb/. .   # Указываем путь к папке, где находятся исходники проекта
+COPY /Backend/WaveifyWeb/. .
 RUN dotnet restore "WaveifyWeb.sln"
 RUN dotnet publish "WaveifyWeb/WaveifyWeb.csproj" -c Release -o /app/publish
 
