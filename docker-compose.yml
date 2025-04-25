@@ -14,7 +14,7 @@ services:
 
   backend:
     build:
-      context: /root/Waveify/Backend
+      context: ./Backend
     container_name: backend
     ports:
       - "7040:7040"
