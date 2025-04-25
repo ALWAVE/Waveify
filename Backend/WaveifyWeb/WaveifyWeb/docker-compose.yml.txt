@@ -1,0 +1,9 @@
+version: '3'
+services:
+	postgres:
+		contrainer_name: postgres
+		image: postgres:14-alphine
+		ports:
+			- 5432:5432
+		environment:
+		

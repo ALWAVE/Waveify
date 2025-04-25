@@ -1,0 +1,14 @@
+﻿using Waveify.Core.Models;
+
+namespace Waveify.Application.Interfaces.Repositories
+{
+    public interface ISongRepositories
+    {
+        Task Add(Song song);
+        Task <Song>GetSongById(Guid id);
+        Task<List<Song>> GetSongsByUserId(Guid userId);
+        Task<List<Song>> GetAll();
+        Task Update(Song song);
+        Task Delete (Guid id);
+    }
+}
