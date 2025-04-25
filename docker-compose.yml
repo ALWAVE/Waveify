@@ -14,7 +14,7 @@ services:
 
   backend:
     build:
-      context: ./backend
+      context: ./Backend
     container_name: backend
     ports:
       - "7040:7040"
@@ -23,7 +23,7 @@ services:
 
   frontend:
     build:
-      context: ./frontend
+      context: ./Frontend
     container_name: frontend
     ports:
       - "3000:3000"
