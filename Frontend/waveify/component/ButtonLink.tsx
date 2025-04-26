@@ -1,10 +1,11 @@
-import { Link } from "lucide-react";
+
+import Link from "next/link";
 import React from "react";
 import { twMerge } from "tailwind-merge";
 
 interface ButtonLinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
     className?: string; // Сделаем className необязательным
-    href?: string; // Добавляем href в интерфейс
+    href: string; // Добавляем href в интерфейс
     children: React.ReactNode;
 }
 

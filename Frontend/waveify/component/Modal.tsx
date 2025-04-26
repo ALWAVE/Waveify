@@ -4,7 +4,7 @@ import { IoMdClose } from "react-icons/io"
 
 interface ModalProps {
     isOpen: boolean;
-    onChange: (open: boolean) => void;
+    onChange?: (open: boolean) => void;
     title: string;
     description: string;
     children: React.ReactNode;
@@ -16,7 +16,7 @@ const Modal: React.FC<ModalProps> = ({
     title,
     description,
     children,
-    }) => {
+}) => {
     return (
         <Dialog.Root
             open={isOpen}
@@ -74,7 +74,10 @@ const Modal: React.FC<ModalProps> = ({
                             {children}
                         </div>
                         <Dialog.Close asChild >
-                            <button onClick={isOpen = false}
+                            <button 
+                                onClick={() => {
+                                    if (onChange) onChange(false); // Проверка на undefined
+                                }}
                                 className="
                                 cursor-pointer
                                 text-neutral-400 

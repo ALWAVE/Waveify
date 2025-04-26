@@ -48,8 +48,8 @@ const MobileBar = () => {
   return (
     <div className="fixed bottom-[80px] z-20 w-full bg-black/80 border-t border-neutral-700 px-6 py-2 flex justify-between md:hidden">
     {route.map((item) => (
-      <div key={item.label} style={{ WebkitAppRegion: "drag" }}>
-        <div style={{ WebkitAppRegion: "no-drag" }}>
+      <div key={item.label} className="drag-region">
+        <div className="no-drag">
         <SidebarItem  textColorActive="black" className = {twMerge(`rounded-full `)}
         positionToolTipe="top" {...item} />
         <span className="text-xs">{item.label}</span>

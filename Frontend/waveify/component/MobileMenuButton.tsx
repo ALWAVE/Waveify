@@ -14,8 +14,8 @@ const MobileMenuButton = () => {
       <div className="block md:hidden">
         <ButtonLogin
           onClick={() => setOpen((prev) => !prev)}
-          style={{ WebkitAppRegion: "no-drag" }}
-          className="bg-[var(--bgButton)] flex items-center text-[var(--text)] w-15 h-15 font-medium  rounded-full text-sm"
+       
+          className="no-drag bg-[var(--bgButton)] flex items-center text-[var(--text)] w-15 h-15 font-medium  rounded-full text-sm"
         >
           <IoMenu   size={40} />
       

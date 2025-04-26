@@ -11,9 +11,10 @@ import { Link } from "lucide-react";
 import { parseBlob } from "music-metadata-browser";
 import ButtonLink from "./ButtonLink";
 import useSongs from "@/hooks/useSongs"
+import toast from "react-hot-toast";
 
 const UploadModal = () => {
-    const [isLoading, setIsLoading] = useState();
+    const [isLoading, setIsLoading] = useState<boolean>(false);
     const { user } = useAuth();
     const { refresh } = useSongs()
     const uploadModal = useUploadModal();
@@ -73,8 +74,8 @@ const UploadModal = () => {
           uploadModal.onClose();
           reset();
         } catch (err) {
-          console.error("Error uploading:", err);
-          alert(err.message || "Something went wrong");
+            console.error("Error uploading:", err);
+            toast.error("Error uploading");
         } finally {
           setIsLoading(false);
         }

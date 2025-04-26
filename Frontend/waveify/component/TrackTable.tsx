@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Clock, Pencil, Badge } from "lucide-react";
+import { Clock, Pencil } from "lucide-react";
 import Image from "next/image";
 import { Song } from "@/models/Song";
 import useOnPlay from "@/hooks/useOnPlay";
@@ -7,6 +7,7 @@ import usePlayer from "@/hooks/usePlayer";
 import PlayButton from "@/component/PlayButton";
 import EditSongModal from "./EditSongModal";
 import SongLikeButton from "./SongLikeButton";
+import { Badge } from "./Badge";
 
 interface TrackTableProps {
   tracks: Song[];

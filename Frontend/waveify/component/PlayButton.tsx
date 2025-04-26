@@ -2,7 +2,7 @@ import { FaPlay, FaPause } from "react-icons/fa";
 
 interface PlayButtonProps {
   isPlaying?: boolean;
-  onClick?: () => void;
+  onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
   className?: string;
 }
 

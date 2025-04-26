@@ -20,14 +20,15 @@ const useOnPlay = (songs: Song[]) => {
     // Убедитесь, что громкость передается в плеер
     if (player.activeId === id) {
       // 👉 Остановить проигрывание
-      return player.setId(null);
+      return player.setId("");
     }
 
     player.setId(id); // активный трек
     player.setIds(songs.map(song => song.id)); // список треков
 
     // Устанавливаем громкость для нового трека
-    player.setVolume(volume); // Передаем текущую громкость
+    player.loadVolume();// Возможно, здесь просто вызывается метод без возвращаемого значения
+    player.setVolume(volume); 
   };
 
   return onPlay;

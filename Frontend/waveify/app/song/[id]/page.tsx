@@ -12,9 +12,10 @@ import { LuPlus } from "react-icons/lu";
 import { useAuth } from "@/providers/AuthProvider";
 import { IoSend } from "react-icons/io5";
 import { gradientMap } from "@/libs/gradients";
+import { GradientColor } from "antd/es/color-picker/color";
 const SongPage = () => {
   const params = useParams(); // Получаем параметры маршрута с помощью useParams
-  const id = params.id; // Извлекаем id из параметров
+  const id =  Array.isArray(params.id) ? params.id[0] : params.id; // Извлекаем id из параметров
 
   // Получаем данные о песне
   const { song, isLoading, error } = useGetSongById(id);
@@ -149,10 +150,11 @@ const SongPage = () => {
           </div>
 
           {/* Форма для добавления комментария */}
-          <div className="flex items-center mt-6 border-t border-neutral-800 pt-4">
-            <div className={` text-[var(--text)] font-semibold mr-1 px-4 py-2 rounded-full transition p-4 ${hasPremiumSubscription
-                ? gradientMap[user?.subColor] // Градиент для кнопки
-                : "bg-[var(--bgProfile)]" // Стандартный фон
+          {/* <div className="flex items-center mt-6 border-t border-neutral-800 pt-4">
+          <div className={`text-[var(--text)] font-semibold mr-1 px-4 py-2 rounded-full transition p-4 ${
+                hasPremiumSubscription
+                  ? gradientMap[user?.subColor as GradientKey] // Приведение типа
+                  : "bg-[var(--bgProfile)]" // Стандартный фон
               }`}>
               {user?.userName ? user.userName.charAt(0).toUpperCase() : "?"}
             </div>
@@ -165,7 +167,7 @@ const SongPage = () => {
               <IoSend   size={20} onClick={() => handleShare()} />
               <Tooltip label="Send" position="top" />
             </button>
-          </div>
+          </div> */}
         </div>
       </div>
 

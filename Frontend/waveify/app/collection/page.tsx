@@ -3,14 +3,26 @@ import BeatItem from "@/component/BeatItem";
 import PageTitle from "@/component/PageTitle";
 import TrackTable from "@/component/TrackTable";
 import PageContent from "./PageContent";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 // ВАЖНО: тут уже новый хук
 import { useUserSongs } from "@/hooks/useUserSongs";
 
 const Collection = () => {
+  const [songss, setSongs] = useState<any[]>([]); // Убедимся, что songs — это массив
   const { songs, isLoading } = useUserSongs();
-
+  const updateLikedSongs = (updatedSong: any) => {
+    setSongs((prevSongs) => {
+      // Найдем песню в списке и обновим её, если она уже существует
+      const songIndex = prevSongs.findIndex((song: any) => song.id === updatedSong.id);
+      if (songIndex > -1) {
+        prevSongs[songIndex] = updatedSong; // Обновляем существующую песню
+      } else {
+        prevSongs.unshift(updatedSong); // Добавляем песню в начало, если её нет
+      }
+      return [...prevSongs];
+    });
+  };
   return (
     <div className="
       p-4
@@ -26,7 +38,7 @@ const Collection = () => {
       {isLoading ? (
         <p className="text-neutral-400">Загрузка песен...</p>
       ) : (
-        <TrackTable tracks={songs} />
+        <TrackTable tracks={songs} updateLikedSongs={updateLikedSongs}/>
       )}
 
       <PageTitle title="Beats" />

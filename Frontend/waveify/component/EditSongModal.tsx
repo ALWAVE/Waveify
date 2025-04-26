@@ -7,6 +7,7 @@ import { useForm, FieldValues } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { Song } from "@/models/Song";
 import useSongs from "@/hooks/useSongs";
+import toast from "react-hot-toast";
 
 interface EditSongModalProps {
   song: Song;
@@ -63,7 +64,7 @@ const EditSongModal: React.FC<EditSongModalProps> = ({ song, onClose }) => {
       reset();
     } catch (err) {
       console.error("Error updating:", err);
-      alert(err.message || "Something went wrong");
+      toast.error("Ошибочка обновления");
     } finally {
       setIsLoading(false);
     }

@@ -20,8 +20,8 @@ const TitleBar = () => {
 
   return (
     <div
-      className="absolute top-0 mt-3 right-0 flex select-none bg-[var(--bg)] "
-      style={{ WebkitAppRegion: "no-drag" }}
+      className="no-drag absolute top-0 mt-3 right-0 flex select-none bg-[var(--bg)] "
+  
     >
 
       <button id="minimize-btn" className=" px-3 py-2 text-[var(--text)] hover:bg-neutral-700" onClick={handleMinimize}>

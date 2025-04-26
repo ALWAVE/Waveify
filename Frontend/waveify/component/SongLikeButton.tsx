@@ -5,11 +5,12 @@ import { LuHeart } from "react-icons/lu";
 import { FaHeart } from "react-icons/fa";
 import Tooltip from "./Tooltipe";
 import toast from "react-hot-toast";
+import { Song } from "@/models/Song";
 
 interface SongLikeButtonProps {
   songId: string;
-  toolTipePosition: string;
-  updateLikedSongs: (newSong: any) => void; // Обновляем тип, чтобы передавать песню
+  toolTipePosition?: 'top' | 'bottom' | 'left' | 'right';
+  updateLikedSongs?: (newSong: any) => void; // Обновляем тип, чтобы передавать песню
 }
 
 const SongLikeButton: React.FC<SongLikeButtonProps> = ({ songId, toolTipePosition, updateLikedSongs }) => {
@@ -22,8 +23,8 @@ const SongLikeButton: React.FC<SongLikeButtonProps> = ({ songId, toolTipePositio
 
     const checkIfLiked = async () => {
       try {
-        const likedSongs = await getLikedSongs(user.id, 1, 10); // используем пагинацию с page=1 и pageSize=10
-        const liked = likedSongs.some((song) => song.id === songId);
+        const likedSongs = await getLikedSongs(user.id, 1, 10) as Song[];
+        const liked = (likedSongs as { id: string }[]).some((song) => song.id === songId);
         setIsLiked(liked);
       } catch (err) {
         console.error("Ошибка получения лайков:", err);
@@ -60,7 +61,7 @@ const SongLikeButton: React.FC<SongLikeButtonProps> = ({ songId, toolTipePositio
         });
 
         // После добавления лайка, передаем новую песню для немедленного обновления
-        updateLikedSongs({ id: songId, title: "Song Title", author: "Author" }); // пример объекта песни
+        updateLikedSongs?.({ id: songId, title: "Song Title", author: "Author" }); // пример объекта песни
       }
     } catch (error) {
       console.error("Ошибка при изменении статуса лайка:", error);

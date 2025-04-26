@@ -3,8 +3,13 @@
 import { useState, useEffect } from "react";
 import Modal from "./Modal";
 import { useAuth } from "@/providers/AuthProvider";
-
-const AuthModal = ({ isOpen, onClose, initialMode = "login" }) => {
+import toast from "react-hot-toast";
+interface AuthModalProps {
+  isOpen: boolean;
+  onClose?: () => void;
+  initialMode?: "login" | "register";
+}
+const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = "login" }) => {
   const { login, register } = useAuth();
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState(""); // ✅ Добавляем username
@@ -13,7 +18,7 @@ const AuthModal = ({ isOpen, onClose, initialMode = "login" }) => {
   const [loading, setLoading] = useState(false);
   const [isRegister, setIsRegister] = useState(initialMode === "register");
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
@@ -32,7 +37,7 @@ const AuthModal = ({ isOpen, onClose, initialMode = "login" }) => {
       // onClose();
     } catch (err) {
       console.error("Ошибка при авторизации/регистрации:", err);
-      setError(err.message || "Ошибка! Проверьте данные и попробуйте снова.");
+      toast.error("Ошибка при авторизации/регистрации");
     } finally {
       setLoading(false);
     }

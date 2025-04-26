@@ -17,7 +17,6 @@ const Favorite = () => {
     songs: fetchedSongs, // Песни, которые получаем с сервера
     isLoading,
     totalCount,
-    refetch,
   } = useGetLikedSongs(user?.id || "", currentPage, pageSize);
 
   const totalPages = Math.ceil(totalCount / pageSize);

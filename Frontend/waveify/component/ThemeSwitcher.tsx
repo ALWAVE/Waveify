@@ -49,7 +49,7 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ themeActiveted, src }) =>
     >
       <img
         src={`${src}`}
-        fill
+      
         className=" h-24 w-40 shadow-md"
       />
       {themeActiveted} theme

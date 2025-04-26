@@ -1,23 +1,26 @@
 "use client"
 
 import { useState } from "react"
-import { Song } from "@/types"
+
 import { HiOutlineDownload } from "react-icons/hi";
 import PlayButton from "./PlayButton"
 import ButtonLogin from "./ButtonLogin"
 import { LiaShoppingBagSolid } from "react-icons/lia";
 import SongRating from "./SongRating";
+import { Song } from "@/models/Song";
 interface BeatItemProps {
-  data: Song
-  onClick: (id: string) => void
+  data?: Song
+
+  onClick?: (id: string) => void
 }
 
 const BeatItem: React.FC<BeatItemProps> = ({ data, onClick }) => {
-  const [showDownloadButton, setShowDownloadButton] = useState(!!"ds")
+  const [showDownloadButton, setShowDownloadButton] = useState(false);
+
 
   return (
     <div
-      onClick={() => onClick(data.id)}
+      // onClick={() => onClick(data.id)}
       className="
         relative 
         group 
@@ -47,7 +50,7 @@ const BeatItem: React.FC<BeatItemProps> = ({ data, onClick }) => {
 
       {/* Кнопка воспроизведения */}
       <div className="absolute bottom-24 right-5">
-        <PlayButton />
+        {/* <PlayButton /> */}
       </div>
       <div
         className="

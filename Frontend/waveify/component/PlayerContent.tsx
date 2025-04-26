@@ -18,7 +18,7 @@ import Link from "next/link";
 interface PlayerContentProps {
   song: Song;
   songUrl: string;
-  favorites: Set<string>;
+  favorites?: Set<string>;
 }
 
 const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl, favorites }) => {

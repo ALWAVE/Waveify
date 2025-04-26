@@ -42,7 +42,7 @@ const SongRating = () => {
       ">
         <FaRegHeart className="text-white" />
       </button> */}
-      <SongLikeButton/>
+      {/* <SongLikeButton/> */}
     </div>
   )
 }

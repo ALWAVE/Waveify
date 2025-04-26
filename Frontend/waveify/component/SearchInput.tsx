@@ -22,8 +22,8 @@ const SearchInput = () => {
     <div>
       {/* PC VERISON */}
       <div
-        className="hidden md:block relative flex items-center group "
-        style={{ WebkitAppRegion: "no-drag" }}
+        className="no-drag hidden md:block relative flex items-center group "
+      
       >
         <input
           type="text"
@@ -40,11 +40,11 @@ const SearchInput = () => {
         {/* Кнопка поиска */}
         <button
           onClick={toggleSearch}
-          className={`cursor-pointer text-neutral-400   absolute left-2 transition-all duration-300 ease-in-out 
+          className={`no-drag cursor-pointer text-neutral-400   absolute left-2 transition-all duration-300 ease-in-out 
             ${isSearchVisible ? 
             "text-white hover:rose-500" : "bg-[var(--bgPage)] text-neutral-300 " 
             } rounded-full p-2`}
-          style={{ WebkitAppRegion: "no-drag" }}
+      
         >
           <BiSearch size={26} />
           <Tooltip label="Search" />
@@ -55,8 +55,8 @@ const SearchInput = () => {
 
           <button
             onClick={clearSearch}
-            className="cursor-pointer  absolute right-2 mt-1 text-white bg-neutral-700 rounded-full p-1"
-            style={{ WebkitAppRegion: "no-drag" }}
+            className="no-drag cursor-pointer  absolute right-2 mt-1 text-white bg-neutral-700 rounded-full p-1"
+          
           >
             <AiOutlineClose size={20} />
           </button>

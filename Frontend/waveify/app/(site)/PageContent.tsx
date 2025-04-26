@@ -1,5 +1,4 @@
 "use client";
-import BeatItem from "@/component/BeatItem";
 import SongItem from "@/component/SongItem";
 import { Song } from "@/models/Song";
 

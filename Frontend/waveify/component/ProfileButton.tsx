@@ -11,7 +11,15 @@ import { FaPlus } from "react-icons/fa";
 import Link from "next/link";
 import { gradientMap } from '@/libs/gradients';
 import Tooltip from "./Tooltipe";
-const isElectron = typeof window !== "undefined" && window.electron;
+
+declare global {
+    interface Window {
+        electron?: any;
+    }
+}
+
+
+const isElectron = typeof window !== "undefined" && !!window.electron;
 
 const ProfileButton = () => {
     const { user, logout } = useAuth();
@@ -50,10 +58,10 @@ const ProfileButton = () => {
     return (
         <div className="relative z-50" ref={dropdownRef}>
             <button
-                style={{ WebkitAppRegion: "no-drag" }}
+             
                 onClick={() => setIsOpen(!isOpen)}
-                className={`relative group hover:scale-110 cursor-pointer text-[var(--text)] font-semibold px-4 py-2 rounded-full transition p-4 ${hasPremiumSubscription
-                        ? gradientMap[user?.subColor] // Градиент для кнопки
+                className={`no-drag relative group hover:scale-110 cursor-pointer text-[var(--text)] font-semibold px-4 py-2 rounded-full transition p-4 ${hasPremiumSubscription
+                    ? gradientMap[user?.subColor as keyof typeof gradientMap] // Градиент для кнопки
                         : "bg-[var(--bgProfile)]" // Стандартный фон
                     }`}
             >
@@ -75,7 +83,7 @@ const ProfileButton = () => {
 
                     {/* Применение градиента к text-субтитлу, если у пользователя Premium подписка */}
                     <div
-                        className={`px-6 text-sm ${hasPremiumSubscription ? `font-black bg-clip-text text-transparent ${gradientMap[user?.subColor]}` : "text-neutral-400"
+                        className={`px-6 text-sm ${hasPremiumSubscription ? `font-black bg-clip-text text-transparent ${gradientMap[user?.subColor as keyof typeof gradientMap]}` : "text-neutral-400"
                             }`}
                     >
                         {user?.subTitle}

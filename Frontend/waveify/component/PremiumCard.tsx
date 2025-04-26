@@ -1,9 +1,9 @@
 import React from "react";
 import ButtonLogin from "./ButtonLogin";
-import { gradientMap } from '@/libs/gradients';
+import { getGradient, gradientMap, GradientKey  } from '@/libs/gradients';
 interface PremiumCardProps {
   title: string;
-  color: string;
+  color: GradientKey;
   description: string;
   price: number;
   smallTitle: string;
@@ -27,7 +27,7 @@ const PremiumCard: React.FC<PremiumCardProps> = ({
   return (
     <div className="relative overflow-hidden w-full max-w-xs transition-all duration-300 hover:-translate-y-1 hover:shadow-xl border-0 rounded-xl flex flex-col">
       {/* Градиентный фон */}
-      <div className={`absolute inset-0 ${gradientMap[color]} opacity-95`}></div>
+      <div className={`absolute inset-0 ${getGradient(color)} opacity-95`}></div>
 
       {/* Декоративные элементы */}
       <div className="absolute -right-12 -top-12 w-40 h-40 rounded-full bg-white opacity-10"></div>

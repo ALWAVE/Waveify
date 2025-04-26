@@ -5,10 +5,10 @@ import useOnPlay from "@/hooks/useOnPlay";
 import usePlayer from "@/hooks/usePlayer"; // Импортируем хук состояния плеера
 
 import PlayButton from "./PlayButton";
-import SongRating from "./SongRating";
+
 import { Song } from "@/models/Song";
 import Link from "next/link";
-import SongLikeButton from "./SongLikeButton";
+
 
 interface SongItemProps {
   data: Song;
@@ -90,14 +90,13 @@ const SongItem: React.FC<SongItemProps> = ({ data }) => {
             onPlay(data.id); // Запускаем песню
           }}
         >
-          <PlayButton
-            isPlaying={isPlaying} // Проп передаем, чтобы кнопка отображала паузу или воспроизведение
-            onClick={(e) => {
-              e.stopPropagation();
-              onPlay(data.id); // Запускаем/останавливаем песню
-            }}
-            className="p-4 active:scale-85"
-          />
+         <PlayButton
+          isPlaying={isPlaying}
+          onClick={() => {
+            onPlay(data.id);
+          }}
+          className="p-4 active:scale-85"
+        />
         </div>
       </div>
 

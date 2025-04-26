@@ -1,21 +1,44 @@
-import { useEffect, useState } from "react"
-import { Song } from "@/models/Song"
+import { useEffect, useState } from "react";
+import { Song } from "@/models/Song";
 
-const useGetSongById = (id?: string) => {
-  const [song, setSong] = useState<Song | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-
-  useEffect(() => {
-    if (!id) return
-    console.log("Fetching song:", id);
-    setIsLoading(true)
-    fetch(`https://localhost:7040/Song/${id}`)
-      .then(res => res.json())
-      .then(data => setSong(data))
-      .finally(() => setIsLoading(false))
-  }, [id])
-
-  return { song, isLoading }
+interface UseGetSongByIdResult {
+  song: Song | null;
+  isLoading: boolean;
+  error: string | null;
 }
 
-export default useGetSongById
+const useGetSongById = (id?: string): UseGetSongByIdResult => {
+  const [song, setSong] = useState<Song | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!id) return;
+
+    console.log("Fetching song:", id);
+    setIsLoading(true);
+    setError(null); // Сбрасываем ошибку перед новым запросом
+
+    fetch(`https://localhost:7040/Song/${id}`)
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`Failed to fetch song with status ${res.status}`);
+        }
+        return res.json();
+      })
+      .then((data) => {
+        setSong(data);
+      })
+      .catch((err) => {
+        console.error("Error fetching song:", err);
+        setError(err.message || "An unknown error occurred");
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, [id]);
+
+  return { song, isLoading, error };
+};
+
+export default useGetSongById;

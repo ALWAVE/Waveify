@@ -12,7 +12,7 @@ import { FaCirclePlus } from "react-icons/fa6";
 import useUploadModal from "@/hooks/useUploadModal";
 import usePlayer from "@/hooks/usePlayer";
 interface SidebarProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({}) => {

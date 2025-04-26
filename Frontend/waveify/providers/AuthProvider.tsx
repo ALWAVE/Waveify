@@ -1,6 +1,6 @@
 "use client";
 import AuthModal from "@/component/AuthModal";
-import DesktopAuthModal from "@/component/DesktopAuthModal";
+
 import LoadingScreen from "@/component/LoadingScreen";
 import React, { createContext, useContext, useState, useEffect } from "react";
 import toast from "react-hot-toast";

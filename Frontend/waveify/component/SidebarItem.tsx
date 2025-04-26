@@ -3,6 +3,19 @@ import { twMerge } from "tailwind-merge";
 import React, { useState } from "react";
 import Tooltip from "./Tooltipe";
 
+
+interface SidebarItemProps {
+  className?: string;
+  icon: React.ReactNode;
+  iconActive?: React.ReactNode;
+  label: string;
+  active?: boolean;
+  href?: string;
+  positionToolTipe?: "top" | "bottom" | "left" | "right"; // или если там любые строки, тогда просто string
+  textColorActive?: string;
+  onClick?: () => void;
+  isButton?: boolean;
+}
 const SidebarItem: React.FC<SidebarItemProps> = ({
   className,
   icon,

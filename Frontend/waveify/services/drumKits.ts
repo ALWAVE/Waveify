@@ -1,6 +1,7 @@
 export interface DrumKitRequest {
-    tittle: string;
+    title: string;
     description: string;
+    url: string;
     price: number;
 }
 export const getAllDrumKits = async () => {

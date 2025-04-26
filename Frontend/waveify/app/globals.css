@@ -99,3 +99,9 @@ img {
   max-width: 100%;
   border-radius: 8px;
 }
+.drag-region {
+  -webkit-app-region: drag;
+}
+.no-drag {
+  -webkit-app-region: no-drag;
+}
