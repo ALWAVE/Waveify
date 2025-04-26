@@ -61,7 +61,7 @@ const UploadModal = () => {
             formData.append("Image", imageFile);
           }
       
-          const response = await fetch("https://localhost:7040/Song/upload", {
+          const response = await fetch("http://waveify.ru/api/Song/upload", {
             method: "POST",
             body: formData,
           });

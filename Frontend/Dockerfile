@@ -1,8 +1,26 @@
-FROM node:20-alpine as build
+# Используем более новую версию Node.js
+FROM node:18 AS frontend-build
+
+# Устанавливаем рабочую директорию
 WORKDIR /app
-COPY . . 
+
+# Копируем package.json и package-lock.json (если он есть)
+COPY ./waveify/package.json ./waveify/package-lock.json ./
+
+# Устанавливаем зависимости
 RUN npm install
+
+# Копируем оставшиеся файлы проекта
+COPY ./waveify /app
+
+# Собираем проект
 RUN npm run build
 
+# Новый слой, для работы с фронтендом
 FROM nginx:alpine
-COPY --from=build /app/out /usr/share/nginx/html
+
+# Копируем собранные файлы в контейнер NGINX
+COPY --from=frontend-build /app/.next /usr/share/nginx/html
+
+# Экспонируем порт
+EXPOSE 80

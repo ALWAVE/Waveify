@@ -5,12 +5,12 @@ export interface DrumKitRequest {
     price: number;
 }
 export const getAllDrumKits = async () => {
-    const response = await fetch("https://localhost:7040/DrumKit");
+    const response = await fetch("http://localhost:7040/DrumKit");
     return response.json();
 };
 
 export const createDrumKit = async (drumKitRequest: DrumKitRequest) => {
-    await fetch ("https://localhost:7040/DrumKit", {
+    await fetch ("http://localhost:7040/DrumKit", {
         method: "POST",
         headers: {
             "content-type": "application/json",
@@ -21,7 +21,7 @@ export const createDrumKit = async (drumKitRequest: DrumKitRequest) => {
 };
 
 export const updateDrumKit = async (id: string, drumKitRequest: DrumKitRequest) => {
-    await fetch (`https://localhost:7040/DrumKit/${id}`, {
+    await fetch (`http://localhost:7040/DrumKit/${id}`, {
         method: "PUT",
         headers: {
             "content-type": "application/json",
@@ -31,7 +31,7 @@ export const updateDrumKit = async (id: string, drumKitRequest: DrumKitRequest) 
     });
 }
 export const deleteDrumKit = async (id: string) => {
-    await fetch (`https://localhost:7040/DrumKit/${id}`, {
+    await fetch (`http://localhost:7040/DrumKit/${id}`, {
         method: "DELETE",
     });
 }

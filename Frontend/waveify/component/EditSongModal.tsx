@@ -51,7 +51,7 @@ const EditSongModal: React.FC<EditSongModalProps> = ({ song, onClose }) => {
         formData.append("Image", imageFile);
       }
 
-      const response = await fetch(`https://localhost:7040/Song/update`, {
+      const response = await fetch(`https://waveify.ru/api/Song/update`, {
         method: "PUT",
         body: formData,
       });

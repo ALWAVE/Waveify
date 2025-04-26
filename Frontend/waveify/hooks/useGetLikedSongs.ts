@@ -10,7 +10,7 @@ const useGetLikedSongs = (userId: string, page: number, pageSize: number) => {
       setIsLoading(true);
       try {
         const response = await fetch(
-          `https://localhost:7040/api/LikedSongs/${userId}?page=${page}&pageSize=${pageSize}`
+          `http://waveify.ru/api/api/LikedSongs/${userId}?page=${page}&pageSize=${pageSize}`
         );
         const data = await response.json();
         setLikedSongs(data.songs);       // ✅ теперь только песни

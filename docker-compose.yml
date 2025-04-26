@@ -11,24 +11,25 @@ services:
       - postgres-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    restart: unless-stopped
 
   backend:
     build:
       context: ./Backend
-    container_name: backend
+      dockerfile: Dockerfile
     ports:
-      - "7040:7040"
+      - "5000:80"
     depends_on:
       - postgres
+    restart: unless-stopped
 
   frontend:
     build:
       context: ./Frontend
-    container_name: frontend
+      dockerfile: Dockerfile
     ports:
       - "3000:3000"
-    depends_on:
-      - backend
+    restart: unless-stopped
 
   nginx:
     image: nginx:alpine
@@ -40,6 +41,7 @@ services:
     depends_on:
       - frontend
       - backend
+    restart: unless-stopped
 
 volumes:
   postgres-data:

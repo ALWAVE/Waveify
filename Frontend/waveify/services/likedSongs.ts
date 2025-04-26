@@ -6,7 +6,7 @@ export interface LikedSongRequest {
 }
 
 export const likeSong = async (likedSong: LikedSongRequest) => {
-  await fetch("https://localhost:7040/api/LikedSongs/like", {
+  await fetch("http://waveify.ru/api/api/LikedSongs/like", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -16,7 +16,7 @@ export const likeSong = async (likedSong: LikedSongRequest) => {
 };
 
 export const unlikeSong = async (likedSong: LikedSongRequest) => {
-  await fetch("https://localhost:7040/api/LikedSongs/unlike", {
+  await fetch("http://waveify.ru/api/api/LikedSongs/unlike", {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
@@ -27,7 +27,7 @@ export const unlikeSong = async (likedSong: LikedSongRequest) => {
 
 export const getLikedSongs = async (userId: string, page: number = 1, pageSize: number = 10) => {
   try {
-    const response = await fetch(`https://localhost:7040/api/LikedSongs/${userId}?page=${page}&pageSize=${pageSize}`);
+    const response = await fetch(`http://waveify.ru/api/api/LikedSongs/${userId}?page=${page}&pageSize=${pageSize}`);
     const data = await response.json();
     return data.songs; // Возвращаем массив лайкнутых песен
   } catch (error) {

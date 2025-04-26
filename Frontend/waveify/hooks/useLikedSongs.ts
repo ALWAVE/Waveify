@@ -14,7 +14,7 @@ export const useLikedSongs = (userId: string, page: number, pageSize: number) =>
     const fetchLikedSongs = async () => {
       try {
         const response = await fetch(
-          `https://localhost:7040/api/LikedSongs/${userId}?page=${page}&pageSize=${pageSize}`
+          `http://waveify.ru/api/api/LikedSongs/${userId}?page=${page}&pageSize=${pageSize}`
         );
         if (!response.ok) {
           throw new Error("Ошибка загрузки понравившихся песен.");
