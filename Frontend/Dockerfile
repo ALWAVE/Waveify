@@ -4,11 +4,13 @@ FROM node:18 AS frontend-build
 # Устанавливаем рабочую директорию
 WORKDIR /app
 
-# Копируем package.json и package-lock.json (если он есть)
+# Копируем только package.json и package-lock.json
 COPY ./waveify/package.json ./waveify/package-lock.json ./
-COPY ./waveify/node_modules ./node_modules
 
-# Копируем оставшиеся файлы проекта
+# Устанавливаем зависимости внутри контейнера
+RUN npm install
+
+# Копируем остальные файлы проекта
 COPY ./waveify /app
 
 # Собираем проект
