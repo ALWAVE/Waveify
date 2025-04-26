@@ -1,5 +1,5 @@
 # Используем более новую версию Node.js
-FROM node:18 AS frontend-build
+FROM node:20-slim AS frontend-build
 
 # Устанавливаем рабочую директорию
 WORKDIR /app
