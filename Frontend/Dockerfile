@@ -7,9 +7,6 @@ WORKDIR /app
 # Копируем только package.json и package-lock.json
 COPY ./waveify/package.json ./waveify/package-lock.json ./
 
-# Устанавливаем зависимости внутри контейнера
-RUN npm install
-
 # Копируем остальные файлы проекта
 COPY ./waveify /app
 
