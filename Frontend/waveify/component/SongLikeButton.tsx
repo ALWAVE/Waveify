@@ -75,7 +75,7 @@ const SongLikeButton: React.FC<SongLikeButtonProps> = ({ songId, toolTipePositio
     <button
       onClick={handleLike}
       disabled={loading}
-      className="text-neutral-400 hover:scale-112 p-2 m-4 cursor-pointer rounded-full hover:text-white transition relative group active:scale-95 disabled:opacity-50"
+      className="text-neutral-400 hover:scale-112 p-2 m-4 cursor-pointer rounded-full hover:text-[var(--text)] transition relative group active:scale-95 disabled:opacity-50"
     >
       {isLiked ? (
         <FaHeart size={25} className="text-rose-500" />

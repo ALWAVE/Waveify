@@ -7,7 +7,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "dotnetRunMessages": true,
-      "applicationUrl": "http://waveify.ru:5289;https://waveify.ru:7040"
+      "applicationUrl": "http://localhost:5289;https://localhost:7040"
     },
     "IIS Express": {
       "commandName": "IISExpress",
@@ -19,10 +19,10 @@
     "WSL": {
       "commandName": "WSL2",
       "launchBrowser": true,
-      "launchUrl": "https://waveify.ru",
+      "launchUrl": "https://localhost",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "ASPNETCORE_URLS": "https://waveify.ru:7040;http://waveify.ru:5289"
+        "ASPNETCORE_URLS": "https://localhost:7040;http://localhost:5289"
       },
       "distributionName": ""
     }
@@ -31,7 +31,7 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://waveify.ru:41420",
+      "applicationUrl": "http://localhost:41420",
       "sslPort": 44322
     }
   }

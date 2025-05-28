@@ -19,7 +19,7 @@ const useGetSongById = (id?: string): UseGetSongByIdResult => {
     setIsLoading(true);
     setError(null); // Сбрасываем ошибку перед новым запросом
 
-    fetch(`http://waveify.ru/api/Song/${id}`)
+    fetch(`https:/localhost:7040/Song/${id}`)
       .then((res) => {
         if (!res.ok) {
           throw new Error(`Failed to fetch song with status ${res.status}`);

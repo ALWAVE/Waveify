@@ -2,6 +2,7 @@
 import AuthModal from "@/component/AuthModal";
 
 import LoadingScreen from "@/component/LoadingScreen";
+import usePlayer from "@/hooks/usePlayer";
 import React, { createContext, useContext, useState, useEffect } from "react";
 import toast from "react-hot-toast";
 
@@ -17,6 +18,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const player = usePlayer(); 
   const [user, setUser] = useState<any>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isAuthModalOpen, setAuthModalOpen] = useState(false); // 🔥 Контроль модалки
@@ -50,7 +52,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchUser = async () => {
     try {
-      const res = await fetch("http://waveify.ru/api/User/me", {
+      const res = await fetch("https://localhost:7040/api/User/me", {
         method: "GET",
         credentials: "include",
       });
@@ -85,7 +87,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   
   const login = async (email: string, password: string) => {
     try {
-      const res = await fetch("http://waveify.ru/api/User/login", {
+      const res = await fetch("https://localhost:7040/api/User/login", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -94,7 +96,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (!res.ok) throw new Error("Ошибка авторизации");
       toast.success("Успешная авторизация!");
-
+      player.reset();
       await fetchUser();
     } catch (error) {
 
@@ -107,7 +109,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const register = async (email: string, username: string, password: string) => {
     try {
-      const res = await fetch("http://waveify.ru/api/User/register", {
+      const res = await fetch("https://localhost:7040/api/User/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, userName: username, password })
@@ -126,7 +128,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async () => {
     try {
-      await fetch("http://waveify.ru/api/User/logout", {
+      await fetch("https://localhost:7040/api/User/logout", {
         method: "POST",
         credentials: "include",
       });

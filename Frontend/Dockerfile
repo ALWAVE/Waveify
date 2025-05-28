@@ -1,23 +1,19 @@
-# Используем более новую версию Node.js
-FROM node:20-slim AS frontend-build
+# Этап сборки
+FROM node:20-slim AS builder
 
-# Устанавливаем рабочую директорию
 WORKDIR /app
 
-# Копируем только package.json и package-lock.json
-COPY ./waveify/package.json ./waveify/package-lock.json ./
+COPY ./Frontend/waveify/package.json ./package.json
+COPY ./Frontend/waveify/package-lock.json ./package-lock.json
+RUN npm install
 
-# Копируем остальные файлы проекта
-COPY ./waveify /app
-
-# Собираем проект
+COPY ./Frontend/waveify .
 RUN npm run build
 
-# Новый слой, для работы с фронтендом
+# Этап запуска
 FROM nginx:alpine
 
-# Копируем собранные файлы в контейнер NGINX
-COPY --from=frontend-build /app/.next /usr/share/nginx/html
+COPY --from=builder /app/out /usr/share/nginx/html
+COPY ./Ngins/nginx.conf /etc/nginx/nginx.conf
 
-# Экспонируем порт
 EXPOSE 80

@@ -1,6 +1,6 @@
-import Header from "@/component/Header";
+
 import SearchInput from "@/component/SearchInput";
-import { Menu } from "antd";
+
 import Link from 'next/link';
 
 const categories = [
@@ -30,12 +30,7 @@ const Search = () => {
                 <h1 className="hidden md:block mt-10 mb-4 text-white text-3xl font-semibold text-center">
                 Search results for:
                 </h1>
-                <Menu 
-                  theme="dark"
-                  mode = "horizontal"
-                  items={categories}
-                  style={{ flex:1, minWidth: 0, background:"transparent", justifyContent: 'center', border:"white"}}
-                /> 
+              
               </div>
            
         </div>

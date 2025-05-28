@@ -11,26 +11,38 @@ import { Badge } from "./Badge";
 
 interface TrackTableProps {
   tracks: Song[];
-  updateLikedSongs: (updatedSong: any) => void; // Принимаем пропс для обновления песен
+  updateLikedSongs: (updatedSong: any) => void;
+  editMode?: boolean;
 }
 
-const TrackTable: React.FC<TrackTableProps> = ({ tracks = [], updateLikedSongs }) => {
+const TrackTable: React.FC<TrackTableProps> = ({ tracks = [], updateLikedSongs, editMode = false }) => {
   const [editTrack, setEditTrack] = useState<Song | null>(null);
   const onPlay = useOnPlay(tracks);
   const player = usePlayer();
 
   if (!tracks.length) {
-    return (
-      <div className="p-4 text-neutral-400">
-        Нет песен для отображения.
-      </div>
-    );
+    return <div className="p-4 text-neutral-400">Нет песен для отображения.</div>;
   }
 
+  // Функция для отображения текста и варианта Badge по числовому статусу
+  // Обновленная функция getStatusInfo
+  const getStatusInfo = (status: number | null): { text: string; variant: "default" | "destructive" | "outline" | "secondary" } => {
+    switch (status) {
+      case 1:
+        return { text: "Publish", variant: "secondary" }; // зелёный
+      case 2:
+        return { text: "Rejected", variant: "destructive" };  // красный
+      case 0:
+      default:
+        return { text: "Check your track", variant: "outline" }; // серый
+    }
+  };
+
+
   return (
-    <div className="bg-neutral-900 rounded-lg border border-neutral-800 mt-6 overflow-x-auto">
+    <div className="bg-[var(--bgPage)] rounded-lg border border-neutral-800 mt-6 overflow-x-auto">
       <div className="p-4 rounded-lg border-b border-neutral-800">
-        <h2 className="text-xl rounded-lg font-bold text-white">Your Collection</h2>
+        <h2 className="text-xl rounded-lg font-bold text-[var(--text)]">Your Collection</h2>
       </div>
 
       <div className="p-4">
@@ -41,10 +53,11 @@ const TrackTable: React.FC<TrackTableProps> = ({ tracks = [], updateLikedSongs }
               <th className="pb-2">TITLE</th>
               <th className="pb-2">AUTHOR</th>
               <th className="pb-2">GENRE</th>
+              {editMode && <th className="pb-2">STATUS</th>}
               <th className="pb-2 text-right pr-4">
                 <Clock size={16} />
               </th>
-              {/* <th className="pb-2 text-right pr-4">Edit</th> */}
+              {editMode && <th className="pb-2 text-right pr-4">Edit</th>}
             </tr>
           </thead>
           <tbody>
@@ -52,10 +65,12 @@ const TrackTable: React.FC<TrackTableProps> = ({ tracks = [], updateLikedSongs }
               const isActive = player.activeId === track.id;
               const isPlaying = isActive && player.isPlaying;
 
+              const { text: statusText, variant: statusVariant } = getStatusInfo(track.moderationStatus);
+
               return (
                 <tr
                   key={track.id}
-                  className="hover:bg-neutral-800 group cursor-pointer"
+                  className="hover:bg-[var(--bg)] group cursor-pointer"
                   onClick={(e) => {
                     if ((e.target as HTMLElement).closest("button")) return;
                     onPlay(track.id);
@@ -82,7 +97,7 @@ const TrackTable: React.FC<TrackTableProps> = ({ tracks = [], updateLikedSongs }
                       />
                     </div>
                     <div>
-                      <p className={`font-medium truncate ${isActive ? "text-rose-500" : "text-white"}`}>
+                      <p className={`font-medium truncate ${isActive ? "text-rose-500" : "text-[var(--text)]"}`}>
                         {track.title}
                       </p>
                       {track.like > 10 && (
@@ -93,29 +108,36 @@ const TrackTable: React.FC<TrackTableProps> = ({ tracks = [], updateLikedSongs }
                     </div>
                   </td>
 
-                  <td className="py-3">{track.author}</td>
-                  <td className="py-3">{track.genre}</td>
-                  <td className="py-3 text-right pr-4 text-neutral-400">
-                    {track.duration}
-                  </td>
+                  <td className="py-3 text-[var(--text)]">{track.author}</td>
+                  <td className="py-3 text-[var(--text)]">{track.genre}</td>
 
-                  <td className="text-right pr-4 rounded-r-lg">
-                    {/* Добавляем кнопку лайка */}
-                    <SongLikeButton
-                      songId={track.id}
-                      toolTipePosition="left"
-                      // updateLikedSongs={updateLikedSongs}
-                    />
-                    {/* <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setEditTrack(track);
-                      }}
-                      className="text-neutral-400 hover:text-rose-500"
-                    >
-                      <Pencil size={16} />
-                    </button> */}
-                  </td>
+                  {editMode && (
+                    <td className="py-3 text-[var(--text)]">
+                      <Badge variant={statusVariant}>{statusText}</Badge>
+                    </td>
+                  )}
+
+                  <td className="py-3 text-right pr-4 text-neutral-400">{track.duration}</td>
+
+                  {editMode ? (
+                    <td className="text-right pr-4 rounded-r-lg flex items-center justify-end gap-2">
+                      <SongLikeButton songId={track.id} toolTipePosition="left" updateLikedSongs={updateLikedSongs} />
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditTrack(track);
+                        }}
+                        className="text-neutral-400 hover:text-rose-500"
+                        title="Edit track"
+                      >
+                        <Pencil size={16} />
+                      </button>
+                    </td>
+                  ) : (
+                    <td className="text-right pr-4 rounded-r-lg">
+                      <SongLikeButton songId={track.id} toolTipePosition="left" updateLikedSongs={updateLikedSongs} />
+                    </td>
+                  )}
                 </tr>
               );
             })}
@@ -123,9 +145,7 @@ const TrackTable: React.FC<TrackTableProps> = ({ tracks = [], updateLikedSongs }
         </table>
       </div>
 
-      {editTrack && (
-        <EditSongModal song={editTrack} onClose={() => setEditTrack(null)} />
-      )}
+      {editTrack && <EditSongModal song={editTrack} onClose={() => setEditTrack(null)} />}
     </div>
   );
 };

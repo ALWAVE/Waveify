@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Tooltip from "./Tooltipe";
 
 
+
 interface SidebarItemProps {
   className?: string;
   icon: React.ReactNode;
@@ -13,6 +14,7 @@ interface SidebarItemProps {
   href?: string;
   positionToolTipe?: "top" | "bottom" | "left" | "right"; // или если там любые строки, тогда просто string
   textColorActive?: string;
+  bgColorActive?: string;
   onClick?: () => void;
   isButton?: boolean;
 }
@@ -25,6 +27,7 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
   positionToolTipe,
   iconActive,
   textColorActive,
+ 
   onClick,
   isButton = false,
 }) => {

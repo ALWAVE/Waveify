@@ -63,7 +63,8 @@ namespace Waveify.Persistence.Repositories
         {
             var query = _context.LikedSongs
                                 .Where(x => x.UserId == userId)
-                                .Include(x => x.Song);
+                                 .Include(x => x.Song)
+                                    .ThenInclude(s => s.User);
 
             var totalCount = await query.CountAsync();
 

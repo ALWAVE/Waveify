@@ -22,13 +22,11 @@ namespace Waveify.API.Controllers
             if (!request.IsPremiumUser && request.Format.ToLower() == "wav")
                 return BadRequest("WAV доступен только для премиум-пользователей");
 
-            var (data, error) = await _youTubeService.DownloadAudioAsync(request.Url, request.Format);
+            var (data, fileName, error) = await _youTubeService.DownloadAudioAsync(request.Url, request.Format);
 
             if (!string.IsNullOrEmpty(error))
                 return StatusCode(500, error);
 
-            // Передаем файл в ответ для скачивания
-            var fileName = $"download.{request.Format.ToLower()}";
             return File(data, "application/octet-stream", fileName);
         }
     }

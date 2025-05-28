@@ -1,4 +1,4 @@
-using Amazon;
+п»їusing Amazon;
 using Amazon.S3;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
@@ -40,7 +40,7 @@ builder.Services.Configure<JwtOptions>(configuration.GetSection(nameof(JwtOption
 
 builder.Services.AddAutoMapper(typeof(DataBaseMapping));
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-
+builder.Services.AddScoped<ISongReactionRepository, SongReactionRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IDrumKitServices, DrumKitServices>();
 builder.Services.AddScoped<IDrumKitRepositories, DrumKitRepositories>();
@@ -48,6 +48,8 @@ builder.Services.AddScoped<ISongRepositories, SongRepository>();
 builder.Services.AddScoped<ISubscribeRepository, SubscribeRepository>();
 builder.Services.AddScoped<ILikedSongsRepository, LikedSongsRepository>();
 builder.Services.AddScoped<IEntityTypeConfiguration<LikedSongEntity>, LikedSongConfiguration>();
+builder.Services.AddScoped<IPlaylistRepository, PlaylistRepository>();
+builder.Services.AddScoped<IReportSongRepository, ReportSongRepository>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -68,7 +70,7 @@ builder.Services.AddSingleton<IAmazonS3>(sp =>
     var amazonS3Config = new AmazonS3Config
     {
         ServiceURL = s3Settings.ServiceUrl,
-        ForcePathStyle = false, // Отключение ForcePathStyle
+        ForcePathStyle = false, // РћС‚РєР»СЋС‡РµРЅРёРµ ForcePathStyle
         //RegionEndpoint = RegionEndpoint.GetBySystemName(s3Settings.Region)
     };
 
@@ -78,10 +80,10 @@ builder.Services.AddSingleton<IAmazonS3>(sp =>
 
 
 builder.Services.AddSingleton<S3Service>();
-// Регистрируем IJwtProvider
+// Р РµРіРёСЃС‚СЂРёСЂСѓРµРј IJwtProvider
 builder.Services.AddScoped<IJwtProvider, JwtProvider>();
 
-// Подключаем аутентификацию
+// РџРѕРґРєР»СЋС‡Р°РµРј Р°СѓС‚РµРЅС‚РёС„РёРєР°С†РёСЋ
 builder.Services.AddApiAuthentication(builder.Configuration.GetSection("JwtOptions").Get<JwtOptions>());
 
 builder.Services.Configure<JwtOptions>(configuration.GetSection(nameof(JwtOptions)));
@@ -98,18 +100,17 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins(     // Публичный IP фронта
-            "http://waveify.ru"       // (если будет домен)
-        )
-              .AllowCredentials()                    //  ОБЯЗАТЕЛЬНО!
+        policy.WithOrigins("http://localhost:3000")
+             .AllowCredentials()                    //  РћР‘РЇР—РђРўР•Р›Р¬РќРћ!
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+            .WithExposedHeaders("Content-Disposition");
     });
 });
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {
 
     app.UseDeveloperExceptionPage();

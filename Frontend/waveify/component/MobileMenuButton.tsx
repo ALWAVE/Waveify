@@ -12,14 +12,14 @@ const MobileMenuButton = () => {
   return (
     <div>
       <div className="block md:hidden">
-        <ButtonLogin
+        <button
           onClick={() => setOpen((prev) => !prev)}
        
-          className="no-drag bg-[var(--bgButton)] flex items-center text-[var(--text)] w-15 h-15 font-medium  rounded-full text-sm"
+          className="no-drag flex items-center text-[var(--text)] font-medium  rounded-full text-sm"
         >
           <IoMenu   size={40} />
       
-        </ButtonLogin>
+        </button>
       </div>
       <MenuModal isOpen={open} onClose={() => setOpen(false)} />
     </div>

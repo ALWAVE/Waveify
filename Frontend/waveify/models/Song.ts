@@ -10,5 +10,7 @@ export interface Song {
     like: number;
     songPath: string;
     imagePath: string;
+    moderationStatus: number;
     tag: string[];
+    
 }

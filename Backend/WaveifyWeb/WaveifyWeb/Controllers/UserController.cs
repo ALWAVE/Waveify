@@ -63,6 +63,14 @@ namespace Waveify.API.Controllers
 
             return Ok(new { message = "Logged in successfully" });
         }
+    
+        [HttpGet("{id:guid}")]
+        public async Task<IActionResult> GetById(Guid id)
+        {
+            var user = await _userServices.GetUserById(id);
+            if (user == null) return NotFound();
+            return Ok(user);
+        }
 
         [HttpGet("me")]
         [Authorize]
@@ -151,6 +159,22 @@ namespace Waveify.API.Controllers
             await _userServices.SetUserRole(request.UserId, request.Role);
             return Ok(new { message = "Роль установлена!" });
         }
+       
+        [HttpGet("is-moderator")]
+        [Authorize]
+        public async Task<IActionResult> IsModerator()
+        {
+            var userIdClaim = User.FindFirst("userId");
+            if (userIdClaim == null)
+                return Unauthorized();
+
+            var userId = Guid.Parse(userIdClaim.Value);
+            var isModerator = await _userServices.IsUserModerator(userId);
+
+            return Ok(new { isModerator });
+        }
+
+
         [HttpPost("{userId}/subscribe/{subscriptionId}")]
         public async Task<IActionResult> AssignSubscription(Guid userId, Guid subscriptionId, [FromBody] SubscriptionDurationDto durationDto)
         {

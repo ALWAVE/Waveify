@@ -7,7 +7,9 @@ import usePlayer from "@/hooks/usePlayer"; // Импортируем хук со
 import PlayButton from "./PlayButton";
 
 import { Song } from "@/models/Song";
-import Link from "next/link";
+import SmartLink from "./SmartLink";
+
+
 
 
 interface SongItemProps {
@@ -56,14 +58,14 @@ const SongItem: React.FC<SongItemProps> = ({ data }) => {
           overflow-hidden
         "
       >
-        <Link href={`/song/${data.id}`} passHref>
+        <SmartLink href={`/song/${data.id}`} passHref>
           <Image
             src={imageSrc}
             alt="cover"
             fill
             className="object-cover rounded-md"
           />
-        </Link>
+        </SmartLink>
 
       </div>
 
@@ -78,7 +80,7 @@ const SongItem: React.FC<SongItemProps> = ({ data }) => {
             truncate
           "
         >
-          By {data.author}
+          {data.author}
         </p>
       </div>
 

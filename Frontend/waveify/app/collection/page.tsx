@@ -1,62 +1,70 @@
 "use client";
-import BeatItem from "@/component/BeatItem";
-import PageTitle from "@/component/PageTitle";
-import TrackTable from "@/component/TrackTable";
-import PageContent from "./PageContent";
-import { useEffect, useState } from "react";
+import Link from "next/link";
+import { GrFavorite } from "react-icons/gr";
+import { BsCollectionFill } from "react-icons/bs";
+import { HiHeart } from "react-icons/hi2";
+import { useEffect } from "react";
+import toast from "react-hot-toast";
+import { useFavorites } from "@/hooks/useFavorites";
 
-// ВАЖНО: тут уже новый хук
-import { useUserSongs } from "@/hooks/useUserSongs";
+const Page = () => {
+  const { favorites, toggleFavorite, loadFavorites } = useFavorites();
 
-const Collection = () => {
-  const [songss, setSongs] = useState<any[]>([]); // Убедимся, что songs — это массив
-  const { songs, isLoading } = useUserSongs();
-  const updateLikedSongs = (updatedSong: any) => {
-    setSongs((prevSongs) => {
-      // Найдем песню в списке и обновим её, если она уже существует
-      const songIndex = prevSongs.findIndex((song: any) => song.id === updatedSong.id);
-      if (songIndex > -1) {
-        prevSongs[songIndex] = updatedSong; // Обновляем существующую песню
-      } else {
-        prevSongs.unshift(updatedSong); // Добавляем песню в начало, если её нет
-      }
-      return [...prevSongs];
-    });
+  useEffect(() => {
+    loadFavorites();
+  }, []);
+
+  const handleToggle = (label: string, message: string) => {
+    toggleFavorite(label);
+    toast.success(message);
   };
+
   return (
-    <div className="
-      p-4
-      bg-[var(--bgPage)]
-      rounded-lg
-      w-full h-full
-      overflow-hidden
-      overflow-y-auto
-    ">
-      <PageTitle title="Collection" />
-      <PageTitle title="Tracks" />
+    <div className="p-4 bg-[var(--bgPage)] rounded-lg w-full h-full overflow-hidden overflow-y-auto">
+      <div className="flex items-center m-2">
+        {/* Favorite block */}
+        <Link className="m-2" href={"/collection/favorite"}>
+          <div
+            className={`w-64 h-64 rounded-lg bg-gradient-to-r from-rose-500 to-pink-300 flex justify-center items-center ${
+              favorites.includes("Favorite") ? "bg-rose-500" : ""
+            }`}
+          >
+            <HiHeart className="text-white" size={50} />
+          </div>
+          <h1>Favorite</h1>
+        </Link>
+        <button
+          onClick={() => handleToggle("Favorite", "Success Pin Your Favorite")}
+          className={`cursor-pointer rounded-full w-10 h-10 flex items-center justify-center ${
+            favorites.includes("Favorite") ? "bg-rose-500" : "bg-gray-300"
+          }`}
+        >
+          {favorites.includes("Favorite") ? "Unpin" : "Pin"}
+        </button>
 
-      {isLoading ? (
-        <p className="text-neutral-400">Загрузка песен...</p>
-      ) : (
-        <TrackTable tracks={songs} updateLikedSongs={updateLikedSongs}/>
-      )}
-
-      <PageTitle title="Beats" />
-      <div className="
-        grid 
-        grid-cols-2 
-        sm:grid-cols-3 
-        md:grid-cols-3 
-        lg:grid-cols-4 
-        xl:grid-cols-5 
-        2xl:grid-cols-8 
-        gap-4 
-        mt-4
-      ">
-       
+        {/* Your Music block */}
+        <Link className="m-2" href={"/collection/your-tracks"}>
+          <div
+            className={`w-64 h-64 rounded-lg bg-gradient-to-l from-indigo-500 to-cyan-500 flex justify-center items-center ${
+              favorites.includes("Your Music") ? "bg-indigo-500" : ""
+            }`}
+          >
+            <BsCollectionFill className="text-white" size={50} />
+          </div>
+          <h1>Your Music</h1>
+        </Link>
+        <button
+          onClick={() => handleToggle("Your Music", "Success Pin Your Music")}
+          className={`cursor-pointer rounded-full w-10 h-10 flex items-center justify-center ${
+            favorites.includes("Your Music") ? "bg-indigo-500" : "bg-gray-300"
+          }`}
+        >
+          {favorites.includes("Your Music") ? "Unpin" : "Pin"}
+        </button>
       </div>
+      <p>Hello, page</p>
     </div>
   );
 };
 
-export default Collection;
+export default Page;

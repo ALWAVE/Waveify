@@ -1,4 +1,5 @@
 "use client";
+import BeatItem from "@/component/BeatItem";
 import SongItem from "@/component/SongItem";
 import { Song } from "@/models/Song";
 
@@ -29,7 +30,7 @@ const PageContent: React.FC<PageContentProps> = ({songs}) => {
         {songs.map(item => (
             <SongItem  key={item.id} data={item} />
         ))}
-           
+           <BeatItem></BeatItem>
             
         </div>
 

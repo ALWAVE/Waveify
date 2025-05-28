@@ -2,6 +2,6 @@
 {
     public interface IYouTubeService
     {
-        Task<(byte[] data, string error)> DownloadAudioAsync(string url, string format);
+        Task<(byte[] data, string fileName, string error)> DownloadAudioAsync(string url, string format);
     }
 }

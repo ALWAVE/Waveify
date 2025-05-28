@@ -13,8 +13,12 @@ import SearchInput from "./SearchInput";
 import AuthModal from "./AuthModal";
 import { useAuth } from "@/providers/AuthProvider";
 import ProfileButton from "./ProfileButton";
-import Link from "next/link";
+
 import { twMerge } from "tailwind-merge";
+import PageLoader from "./PageLoader";
+
+import MobileMenuButton from "./MobileMenuButton";
+import SmartLink from "./SmartLink";
 
 interface HeaderProps {
   children?: React.ReactNode;
@@ -84,31 +88,36 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
   return (
     <div>
       <div
-        className="drag-region hidden md:flex fixed top-0 left-0 w-full bg-[var(--bg)] p-3 flex items-center select-none relative"
-    
+        className="drag-region  fixed top-0 left-0 w-full bg-[var(--bg)] p-3 flex items-center select-none relative"
+
       >
         {!hideLogo && <TitleBarLogo />}
         <div className="w-full flex items-center justify-between h-full px-4">
           {/* Назад/Вперёд */}
+
+          <div className="block md:hidden">
+            <MobileMenuButton />
+          </div>
+
           <div className="hidden md:flex items-left">
             <button
-            
+
               onClick={() => router.back()}
-              className="no-drug rounded-full bg-[var(--bgPage)] flex items-center hover:opacity-75 hover:bg-rose-500 transition"
+              className="no-drag rounded-full bg-[var(--bgPage)] flex items-center  hover:bg-rose-500 transition"
             >
               <RxCaretLeft className="text-[var(--text)]" size={35} />
             </button>
             <button
-             
+
               onClick={() => router.forward()}
-              className="no-drag rounded-full bg-[var(--bgPage)] flex items-center hover:opacity-75 hover:bg-rose-500 transition"
+              className="no-drag rounded-full bg-[var(--bgPage)] flex items-center  hover:bg-rose-500 transition"
             >
               <RxCaretRight className="text-[var(--text)]" size={35} />
             </button>
           </div>
 
           {/* Центр */}
-          <div id="nav-center" className="hidden md:flex flex gap-x-2 items-center justify-center flex-1">
+          <div id="nav-center" className="flex gap-x-2 items-center justify-center flex-1">
             {route.map((item) => (
               <div key={item.label} className="drag-region">
                 <div className="no-drag">
@@ -127,24 +136,23 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
           {/* Правая часть */}
           <div id="right-section" className="flex items-center gap-x-4 mr-30">
             {!hidePremium && (
-              <Link
-          
+              <SmartLink
                 href={"/premium"}
                 className="no-drag hidden md:flex font-semibold bg-gradient-to-r from-violet-200 to-pink-200 text-black hover:opacity-100 hover:bg-white hover:scale-102 rounded-full px-4 py-1"
               >
                 <h1 className="text-black text-sm whitespace-nowrap">
                   Узнать больше о Premium
                 </h1>
-              </Link>
+              </SmartLink>
             )}
             {!isElectron && (
-              <Link
-           
+              <SmartLink
+
                 href={"/download"}
                 className="no-drag hidden md:block bg-transparent text-grey font-medium"
               >
-                <SlCloudDownload className="text-neutral-400 rounded-full hover:text-white" size={25} />
-              </Link>
+                <SlCloudDownload className="text-neutral-400 rounded-full hover:text-[var(--text)]" size={25} />
+              </SmartLink>
             )}
             {user ? (
               <div className="flex items-center gap-x-4">
@@ -166,8 +174,8 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
                     setAuthMode("login");
                     setAuthModalOpen(true);
                   }}
-              
-                  className= "no-drag bg-white text-black font-semibold px-4 py-2 md:px-5 md:py-2 text-sm md:text-base rounded-full whitespace-nowrap"
+
+                  className="no-drag bg-white text-black font-semibold px-4 py-2 md:px-5 md:py-2 text-sm md:text-base rounded-full whitespace-nowrap"
                 >
                   Log In
                 </ButtonLogin>
@@ -185,7 +193,9 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
 
         {children}
       </div>
+      <PageLoader />
     </div>
+
   );
 };
 

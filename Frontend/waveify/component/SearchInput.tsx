@@ -30,7 +30,7 @@ const SearchInput = () => {
           placeholder="Search..."
           value={searchValue}
           onChange={(e) => setSearchValue(e.target.value)}
-          className={`transition-all duration-300 ease-in-out  bg-neutral-800 text-white rounded-full pl-12 pr-10 py-2  ${isSearchVisible ? "w-90 opacity-100" : "w-0 opacity-0"
+          className={`transition-all duration-300 ease-in-out  bg-[var(--bgPage)] text-[var(--text)] rounded-full pl-12 pr-10 py-2  ${isSearchVisible ? "w-90 opacity-100" : "w-0 opacity-0"
             }`}
           style={{ transition: "width 0.3s ease, opacity 0.3s ease" }}
           onFocus={() => setSearchVisible(true)}
@@ -42,7 +42,7 @@ const SearchInput = () => {
           onClick={toggleSearch}
           className={`no-drag cursor-pointer text-neutral-400   absolute left-2 transition-all duration-300 ease-in-out 
             ${isSearchVisible ? 
-            "text-white hover:rose-500" : "bg-[var(--bgPage)] text-neutral-300 " 
+            "text-[var(--text)] hover:rose-500" : "bg-[var(--bgPage)] text-neutral-400 " 
             } rounded-full p-2`}
       
         >

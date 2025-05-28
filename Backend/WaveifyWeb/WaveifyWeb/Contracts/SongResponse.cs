@@ -10,9 +10,12 @@
         string Genre,
         string Vibe,
         int Like,
+        int Dislike,
+        int Plays,
         string SongPath,
         string ImagePath,
-        List<Guid> Tag // Здесь добавлена запятая
-        //List<Guid> AwardIds
+      
+        List<Guid> TagIds // Здесь добавлена запятая
+                          //List<Guid> AwardIds
     );
 }

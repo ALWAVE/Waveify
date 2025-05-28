@@ -25,7 +25,7 @@ namespace Waveify.Persistence.Configurations
                   .WithMany(u => u.Songs)
                   .HasForeignKey(s => s.UserId)
                   .OnDelete(DeleteBehavior.Cascade); // Если удаляем User, удаляются и его Songs
-
+                    
             builder.HasMany(e => e.Tags)
                    .WithMany()
                    .UsingEntity(j => j.ToTable("SongTags"));

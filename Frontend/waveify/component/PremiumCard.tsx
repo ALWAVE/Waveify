@@ -1,6 +1,6 @@
 import React from "react";
 import ButtonLogin from "./ButtonLogin";
-import { getGradient, gradientMap, GradientKey  } from '@/libs/gradients';
+import { getGradient, GradientKey  } from '@/libs/gradients';
 interface PremiumCardProps {
   title: string;
   color: GradientKey;

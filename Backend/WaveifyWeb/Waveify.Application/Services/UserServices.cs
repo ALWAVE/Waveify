@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System.Data;
+using System.Security.Cryptography;
 using Waveify.Application.Auth;
 using Waveify.Application.Interfaces.Repositories;
 using Waveify.Core.Models;
@@ -159,6 +160,16 @@ namespace Waveify.Application.Services
 
             user.SetRole(parsedRole);
             await _usersRepository.Update(user);
+        }
+        public async Task<bool> IsUserModerator(Guid userId)
+        {
+            var user = await _usersRepository.GetById(userId);
+            if (user == null)
+                throw new Exception("User not found");
+
+            return user.Role == User.UserRole.Moderator; // если enum
+                                                // или: return user.Role == "Moderator"; // если строка
+                                                // или: return user.Role == 3; // если int
         }
 
     }

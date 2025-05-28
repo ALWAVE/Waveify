@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Waveify.Application.Interfaces.Repositories;
-
+using Waveify.Core.Enums;
 using Waveify.Core.Models;
 using Waveify.Persistence.Entities;
 
@@ -30,10 +30,14 @@ namespace Waveify.Persistence.Repositories
                 CreatedAt = song.CreatedAt,
                 Genre = song.Genre,
                 Vibe = song.Vibe,
-                Like = song.Like,             
+                Like = song.Like,
+                Dislike = song.Dislike,
+                Plays = song.Plays,
                 SongPath = song.SongPath,
-                ImagePath = song.ImagePath
+                ImagePath = song.ImagePath,
+                ModerationStatus = song.ModerationStatus
             };
+
 
             await _context.Songs.AddAsync(songEntity);
             await _context.SaveChangesAsync();
@@ -50,8 +54,22 @@ namespace Waveify.Persistence.Repositories
 
         public async Task<List<Song>> GetAll()
         {
-            var songEntities = await _context.Songs.ToListAsync();
+            var songEntities = await _context.Songs
+                .Where(s => s.ModerationStatus == ModerationStatus.Approved)
+                .Include(s => s.User)
+                .ToListAsync();
+
             return _mapper.Map<List<Song>>(songEntities);
+        }
+
+        public async Task<List<Song>> GetAllPendingSongs()
+        {
+            var pendingSongs = await _context.Songs
+                .Where(s => s.ModerationStatus == ModerationStatus.Pending)
+                .Include(s => s.User)
+                .ToListAsync();
+
+            return _mapper.Map<List<Song>>(pendingSongs);
         }
 
         public async Task<Song?> GetSongById(Guid id)
@@ -74,6 +92,15 @@ namespace Waveify.Persistence.Repositories
 
             return songEntities.Any() ? _mapper.Map<List<Song>>(songEntities) : new List<Song>();
         }
+        public async Task<List<Song>> GetPublishedSongsByUserId(Guid userId)
+        {
+            var songEntities = await _context.Songs
+                .Where(s => s.UserId == userId && s.ModerationStatus == ModerationStatus.Approved)
+                .Include(s => s.User)
+                .ToListAsync();
+
+            return songEntities.Any() ? _mapper.Map<List<Song>>(songEntities) : new List<Song>();
+        }
 
         public Task<List<Song>> GetAllMusic()
         {
@@ -81,11 +108,22 @@ namespace Waveify.Persistence.Repositories
         }
         public async Task Update(Song song)
         {
-            var songEntity = _mapper.Map<SongEntity>(song);
+            var existingEntity = await _context.Songs.FirstOrDefaultAsync(s => s.Id == song.Id);
 
-            _context.Songs.Update(songEntity);
+            if (existingEntity == null)
+                throw new InvalidOperationException($"Песня с Id = {song.Id} не найдена");
+
+            // Обновляем только нужные поля
+            existingEntity.ModerationStatus = song.ModerationStatus;
+
+            // При желании — другие поля
+            // existingEntity.Title = song.Title;
+            // existingEntity.Author = song.Author;
+            // ...
+
             await _context.SaveChangesAsync();
         }
+
         public async Task Delete(Guid id)
         {
             var song = await _context.Songs.FindAsync(id);

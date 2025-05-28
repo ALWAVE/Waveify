@@ -6,11 +6,9 @@ import ModalProvider from "@/providers/ModalProvider";
 import Header from "@/component/Header";
 import Player from "@/component/Player";
 import TitleBar from "@/component/TitleBar";
-import AuthModal from "@/component/AuthModal";
 import { AuthProvider } from "@/providers/AuthProvider";
 import ToasterProvider from "@/providers/ToasterProvider";
-import MobileBar from "@/component/MobileBar";
-import PlayerWrapper from "@/component/PlayerWrapper";
+
 const figtree = Figtree({ subsets: ["latin"] })
 
 
@@ -40,6 +38,7 @@ export default function RootLayout({
       </head>
       <body className={`bg-[var(--bg)] ${figtree.className}`}>
         <ToasterProvider />
+  
         <AuthProvider>
           <ModalProvider />
           <div className="flex flex-col h-screen bg-[var(--bg)]">
@@ -47,14 +46,17 @@ export default function RootLayout({
             <TitleBar />
             <div className="flex flex-1 overflow-hidden">
               <Sidebar />
-              <main className="flex-1 bg-[var(--bg)] h-[calc(100%-80px)] overflow-y-auto pr-2 pl-2 relative z-0">
+              <main className="flex-1 bg-[var(--bg)] h-[calc(100%-80px)]   overflow-y-auto pr-2 pl-2 relative z-0">
                 {children}
               </main>
             </div>
-            <MobileBar />
+            {/* <MobilePlayer />
+            <MobileBar /> */}
             <Player />
+            {/* <FullScreenPlayer /> */}
           </div>
         </AuthProvider>
+
       </body>
     </html>
   );

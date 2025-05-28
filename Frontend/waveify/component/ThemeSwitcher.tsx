@@ -1,11 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useState } from "react";
 
 interface ThemeSwitcherProps {
   themeActiveted: string;
-  src: string;
+  src?: string; // Опциональное свойство src
 }
 
 const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ themeActiveted, src }) => {
@@ -45,13 +44,15 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ themeActiveted, src }) =>
   return (
     <button
       onClick={() => toggleTheme(themeActiveted)} // Переключаем на переданную тему
-      className="cursor-pointer hover:opacity-80 bg-[var(--bg)] text-[var(--text)] px-4 py-2 mr-2 rounded-lg"
+      className="flex-col cursor-pointer hover:opacity-80 bg-[var(--bg)] text-[var(--text)] px-4 py-2 mr-2 rounded-lg flex items-center" // flex для выравнивания по центру
     >
-      <img
-        src={`${src}`}
-      
-        className=" h-24 w-40 shadow-md"
-      />
+      {src && ( // Условный рендеринг изображения
+        <img
+          src={src}
+          alt={`${themeActiveted} theme icon`} // Добавляем alt для улучшения доступности
+          className="h-24 w-40 shadow-md mr-2" // Добавляем отступ справа для картинки
+        />
+      )}
       {themeActiveted} theme
     </button>
   );

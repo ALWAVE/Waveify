@@ -9,16 +9,17 @@ export interface SongRequest {
     like: number;
     songPath: string;
     imagePath: string;
+    moderationStatus: number;
     tag: string[];
 }
 
 export const getAllSongs = async () => {
-    const response = await fetch ("https://waveify.ru/api/Song");
+    const response = await fetch ("https://localhost:7040/Song");
     return response.json();
 }
 
 export const createSong = async (songRequest: SongRequest) => {
-    await fetch ("https://waveify.ru/api/Song/upload", {
+    await fetch ("https://localhost:7040/Song/upload", {
         method: "POST",
         headers: {
             "content-type": "application/json",

@@ -19,7 +19,7 @@ const Slider: React.FC<SlideProps> = ({ value = 1, onChange }) => {
       value={[value]}
       onValueChange={handleChange}
       max={1}
-      step={0.01}
+      step={0.001}
       aria-label="Volume">
       <RadixSlider.Track
         className="
@@ -32,7 +32,7 @@ const Slider: React.FC<SlideProps> = ({ value = 1, onChange }) => {
         />
        
       </RadixSlider.Track>
-      <RadixSlider.Thumb className="block w-4 h-4 rounded-full bg-[var(--lightRose)] border border-neutral-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+      <RadixSlider.Thumb className="block w-3 h-3 rounded-full bg-[var(--lightRose)] border border-neutral-600 opacity-0 group-hover:opacity-100 transition-opacity" />
     </RadixSlider.Root>
   )
 }

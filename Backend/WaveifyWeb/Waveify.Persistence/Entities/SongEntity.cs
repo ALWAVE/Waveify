@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Waveify.Core.Enums;
 using Waveify.Core.Models;
 
 namespace Waveify.Persistence.Entities
@@ -17,10 +18,15 @@ namespace Waveify.Persistence.Entities
         public string Genre { get; set; } = string.Empty;
         public string Vibe { get; set; } = string.Empty;
         public int Like { get; set; }
+        public int Dislike { get; set; }
+        public int Plays { get; set; }
         public int Rating { get; set; }
         public string SongPath { get; set; } = string.Empty;
         public string ImagePath { get; set; } = string.Empty;
         public ICollection<TagEntity> Tags { get; set; } = new List<TagEntity>();
+        public ICollection<PlaylistSongEntity> PlaylistSongs { get; set; }
+        public ModerationStatus ModerationStatus { get; set; } = ModerationStatus.Pending;
+
     }
 
     public class BeatEntity : SongEntity

@@ -9,11 +9,13 @@
         string Genre,
         string Vibe,
         int Like,
-        int Rating,
+        int Dislike,
+        int Plays,
         string SongPath,
         string ImagePath,
+       
         List<Guid> TagIds  // Добавляем список ID тегов
-        //List<Guid> AwardIds
+   
         );
     
 }

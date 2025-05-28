@@ -10,6 +10,8 @@ using Waveify.API.DTOs;
 using Amazon.S3.Model;
 using Waveify.API.Settings;
 using Microsoft.Extensions.Options;
+using Waveify.Core.Enums;
+using System.Linq;
 namespace Waveify.API.Controllers
 {
     [ApiController]
@@ -40,7 +42,8 @@ namespace Waveify.API.Controllers
                 new List<Waveify.Core.Models.Tag>(),
                 request.Vibe,
                 request.Like,
-                request.Rating,
+                request.Dislike,
+                request.Plays,
                 request.SongPath,
                 request.ImagePath
             );
@@ -61,20 +64,24 @@ namespace Waveify.API.Controllers
         {
             var songs = await _songRepositories.GetAll();
             var response = songs.Select(d => new SongResponse(
-                d.Id,
-                d.Title, // Ты забыл добавить Title
-                d.Author,
-                d.UserID,
-                d.Duration,
-                d.CreatedAt,
-                d.Genre,
-                d.Vibe,
-                d.Like,
-                d.SongPath,
-                d.ImagePath,
-                d.Tags.Select(t => t.Id).ToList() // Добавляем список ID тегов
-                //d.Awards.Select(a => a.Id).ToList() // Если есть награды, добавляем их ID
-            ));
+      d.Id,
+      d.Title,
+      d.Author,
+      d.UserID,
+      d.Duration,
+      d.CreatedAt,
+      d.Genre,
+      d.Vibe,
+      d.Like,
+      d.Dislike,
+      d.Plays,
+      d.SongPath,
+      d.ImagePath,
+     
+      d.Tags.Select(t => t.Id).ToList() // передаем список тегов
+  ));
+
+
 
             return Ok(response);
         }
@@ -98,8 +105,11 @@ namespace Waveify.API.Controllers
                 song.Genre,
                 song.Vibe,
                 song.Like,
+                song.Dislike,
+                song.Plays,
                 song.SongPath,                
                 song.ImagePath,
+              
                 song.Tags.Select(t => t.Id).ToList() // Если есть теги
             // song.Awards.Select(a => a.Id).ToList() // Если есть награды
             );
@@ -167,6 +177,32 @@ namespace Waveify.API.Controllers
                 return StatusCode(500, $"Неожиданная ошибка: {ex.Message}");
             }
         }
+        [HttpGet("user/{userId}/published")]
+        public async Task<ActionResult<List<SongResponse>>> GetPublishedSongsByUserId(Guid userId)
+        {
+            var songs = await _songRepositories.GetPublishedSongsByUserId(userId);
+
+            var response = songs.Select(d => new SongResponse(
+                d.Id,
+                d.Title,
+                d.Author,
+                d.UserID,
+                d.Duration,
+                d.CreatedAt,
+                d.Genre,
+                d.Vibe,
+                d.Like,
+                d.Dislike,
+                d.Plays,
+                d.SongPath,
+                d.ImagePath,
+                d.Tags.Select(t => t.Id).ToList()
+            ));
+
+            return Ok(response);
+        }
+
+
         [HttpPost("upload")]
         public async Task<IActionResult> UploadSong([FromForm] SongUploadDto songUploadDto)
         {
@@ -256,6 +292,7 @@ namespace Waveify.API.Controllers
                 songUploadDto.Vibe,
                 0,
                 0,
+                0,
                 audioFileUrl,
                 imageFileUrl // <- тут передаётся ссылка на картинку
             );
@@ -296,8 +333,6 @@ namespace Waveify.API.Controllers
                 return StatusCode(500, $"Ошибка при удалении: {ex.Message}");
             }
         }
-
-
 
     }
 }

@@ -2,7 +2,7 @@
 using AutoMapper;
 using Waveify.Core.Models;
 using Waveify.Persistence.Entities;
-
+using Waveify.Core.Enums;
 namespace Waveify.Persistence
 {
     public class DataBaseMapping : Profile
@@ -14,14 +14,18 @@ namespace Waveify.Persistence
 
             // Настройка маппинга для SongEntity -> Song
             CreateMap<SongEntity, Song>()
-                .ForMember(dest => dest.Tags, opt => opt.NullSubstitute(new List<Tag>()));
+                
+                  .ForMember(dest => dest.Tags, opt => opt.NullSubstitute(new List<Tag>()));
+            CreateMap<SongEntity, Song>()
+                .ForCtorParam("user", opt => opt.MapFrom(src => src.User));
+
             // Настройка маппинга для UserEntity -> Guid
             CreateMap<UserEntity, Guid>()
                 .ConvertUsing(src => src.Id);
             CreateMap<User, UserEntity>()
                 .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.Role.ToString()));
 
-
+            
 
             CreateMap<User, UserEntity>()
                 .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.Role.ToString()));
@@ -30,6 +34,14 @@ namespace Waveify.Persistence
             CreateMap<Tag, Tag>();
             CreateMap<LikedSong, LikedSongEntity>();
             CreateMap<RefreshToken, RefreshTokenEntity>();
+            CreateMap<Playlist, PlaylistEntity>().ReverseMap();
+            CreateMap<PlaylistEntity, Playlist>().ReverseMap();
+            CreateMap<SongEntity, Song>();
+            CreateMap<SongReactionEntity, SongReaction>();
+            CreateMap<ReportSongEntity, ReportSong>();
+            CreateMap<Song, SongEntity>()
+           .ReverseMap();
+        
         }
         private static User.UserRole ParseRole(string? role)
         {

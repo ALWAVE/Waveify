@@ -26,7 +26,7 @@ namespace Waveify.Persistence.Repositiories
         }
         private async Task<bool> UserNameExists(string userName)
         {
-            return await _context.Users.AnyAsync (u => u.UserName == userName);
+            return await _context.Users.AnyAsync(u => u.UserName == userName);
         }
         private async Task<bool> EmailExists(string email)
         {
@@ -37,9 +37,9 @@ namespace Waveify.Persistence.Repositiories
             if (await UserNameExists(user.UserName))
             {
                 throw new ArgumentException("Пользователь с таким UserName уже существует!");
-                
+
             }
-            if (await EmailExists(user.Email)) 
+            if (await EmailExists(user.Email))
             {
                 throw new ArgumentException(
                     "Пользователь с таким Email уже существует!");
@@ -53,17 +53,17 @@ namespace Waveify.Persistence.Repositiories
                 Email = user.Email
             };
 
-           
+
             await _context.Users.AddAsync(userEntity);
             await _context.SaveChangesAsync();
 
         }
         public async Task<User> GetByEmail(string email)
         {
-           
+
             var userEntity = await _context.Users
                  .Include(u => u.Songs)
-              
+
                  .Include(u => u.Subscription)
                 .FirstOrDefaultAsync(u => u.Email == email);
 
@@ -75,7 +75,7 @@ namespace Waveify.Persistence.Repositiories
 
             return _mapper.Map<User>(userEntity);
         }
-       
+
         public async Task AssignSubscription(Guid id, Guid subscriptionId, DateTime startDate, DateTime? endDate)
         {
             var user = await _context.Users.FindAsync(id);
@@ -98,17 +98,17 @@ namespace Waveify.Persistence.Repositiories
             {
                 throw new Exception("User not found");
             }
-         
+
             userEntity.UserName = user.UserName;
             userEntity.PasswordHash = user.PasswordHash;
             userEntity.Email = user.Email;
             userEntity.SubscriptionId = user.SubscriptionId;
             userEntity.SubscriptionStart = user.SubscriptionStart;
             userEntity.SubscriptionEnd = user.SubscriptionEnd;
-
+            userEntity.Role = user.Role.ToString();
             await _context.SaveChangesAsync();
         }
-       
+
         public async Task<User?> GetById(Guid id)
         {
             var userEntity = await _context.Users
@@ -122,10 +122,29 @@ namespace Waveify.Persistence.Repositiories
         {
             var songEntities = await _context.Songs
                 .Where(s => s.UserId == userId)
+                 .Include(s => s.User)
                 .ToListAsync();
 
             // Преобразуем List<SongEntity> в List<Song>
             return _mapper.Map<List<Song>>(songEntities);
         }
+        public async Task<List<Song>> GetSongsByPlaylistId(Guid playlistId)
+        {
+            var playlistEntity = await _context.Playlists
+                .Include(p => p.PlaylistSongs)
+                .ThenInclude(ps => ps.Song)
+                .FirstOrDefaultAsync(p => p.Id == playlistId);
+
+            if (playlistEntity == null)
+                throw new Exception("Playlist not found");
+
+            // Маппим Songs из PlaylistSongs
+            var songs = playlistEntity.PlaylistSongs
+                .Select(ps => ps.Song)
+                .ToList();
+
+            return _mapper.Map<List<Song>>(songs); // Используем AutoMapper
+        }
+
     }
 }

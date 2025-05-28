@@ -24,13 +24,13 @@ const TitleBar = () => {
   
     >
 
-      <button id="minimize-btn" className=" px-3 py-2 text-[var(--text)] hover:bg-neutral-700" onClick={handleMinimize}>
+      <button id="minimize-btn" className="rounded-r-lg px-3 py-2 text-[var(--text)] hover:bg-neutral-700" onClick={handleMinimize}>
         <BsDashLg size={17} />
       </button>
-      <button id="maximize-btn" className="  px-3 py-2 text-[var(--text)] hover:bg-orange-400" onClick={handleMaximize}>
+      <button id="maximize-btn" className="rounded-l-lg rounded-r-lg px-3 py-2 text-[var(--text)] hover:bg-orange-400" onClick={handleMaximize}>
         <IoIosSquareOutline size={17} />
       </button>
-      <button id="close-btn" className=" px-3 py-2 text-xl text-[var(--text)] bg-transparent hover:bg-red-600 transition" onClick={handleClose}>
+      <button id="close-btn" className="rounded-l-lg px-3 py-2 text-xl text-[var(--text)] bg-transparent hover:bg-red-600 transition" onClick={handleClose}>
         <CgClose size={17} />
       </button>
       

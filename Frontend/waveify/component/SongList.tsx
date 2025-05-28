@@ -1,6 +1,4 @@
 "use client";
-
-import { useState, useEffect } from "react";
 import { Song } from "@/models/Song";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 import SongItem from "./SongItem"; // Компонент для отображения песни

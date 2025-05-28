@@ -9,6 +9,7 @@ module.exports = {
         colors: {
        
         }
+        
       },
     },
     plugins: [],

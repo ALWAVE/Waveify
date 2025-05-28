@@ -61,7 +61,7 @@ const UploadModal = () => {
             formData.append("Image", imageFile);
           }
       
-          const response = await fetch("http://waveify.ru/api/Song/upload", {
+          const response = await fetch("https://localhost:7040/Song/upload", {
             method: "POST",
             body: formData,
           });
@@ -99,22 +99,39 @@ const UploadModal = () => {
                     {...register('author', { required: true })}
                     placeholder="Song author"
                 />
-                <div className="flex justify-center">
-                    <Input
-                        id="author"
-                        disabled={isLoading}
-                        {...register('genre', { required: true })}
-                        placeholder="Genre"
-                        className="mr-2"
-                    />
-                    <Input
-                        id="author"
-                        disabled={isLoading}
-                        {...register('vibe', { required: true })}
-                        placeholder="Vibe"
-                    />
+                <div>
+                    <h3 className="pb-1 font-semibold">Select Genre:</h3>
+                    <div className="flex items-start  space-x-2">
+                        {["Rap", "Pop", "Rock", "Ambient"].map((genre) => (
+                            <label key={genre} className="flex items-center cursor-pointer hover:bg-neutral-700 rounded-lg p-2">
+                                <input
+                                    type="radio"
+                                    value={genre}
+                                    {...register('genre', { required: true })}
+                                    className="mr-2 custom-radio" 
+                                />
+                                {genre}
+                            </label>
+                        ))}
+                    </div>
                 </div>
-
+            
+                <div>
+                    <h3 className="pb-1 font-semibold">Select Vibe:</h3>
+                    <div className="flex items-start space-x-2">
+                        {["Joyfully", "Energetic", "Quietly", "Sad"].map((vibe) => (
+                            <label key={vibe} className="flex items-center cursor-pointer hover:bg-neutral-700 rounded-lg p-2">
+                                <input
+                                    type="radio"
+                                    value={vibe}
+                                    {...register('vibe', { required: true })}
+                                    className="mr-2 custom-radio" // Применяем кастомный класс
+                                />
+                                {vibe}
+                            </label>
+                        ))}
+                    </div>
+                </div>
                 <div>
 
                     <div className="pb-1">

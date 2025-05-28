@@ -1,4 +1,5 @@
-﻿using Waveify.Core.Models;
+﻿using Amazon.S3.Model;
+using Waveify.Core.Models;
 
 namespace Waveify.Application.Interfaces.Repositories
 {
@@ -10,5 +11,7 @@ namespace Waveify.Application.Interfaces.Repositories
         Task<List<Song>> GetAll();
         Task Update(Song song);
         Task Delete (Guid id);
+        Task<List<Song>> GetAllPendingSongs();
+        Task<List<Song>> GetPublishedSongsByUserId(Guid id);
     }
 }
