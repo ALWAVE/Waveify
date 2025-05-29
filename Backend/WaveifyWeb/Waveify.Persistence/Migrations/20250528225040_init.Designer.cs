@@ -12,8 +12,8 @@ using Waveify.Persistence;
 namespace Waveify.Persistence.Migrations
 {
     [DbContext(typeof(WaveifyDbContext))]
-    [Migration("20250417165643_init11")]
-    partial class init11
+    [Migration("20250528225040_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -68,6 +68,12 @@ namespace Waveify.Persistence.Migrations
                         .HasColumnType("text");
 
                     b.Property<int>("Like")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ModerationStatus")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Plays")
                         .HasColumnType("integer");
 
                     b.Property<string>("SongPath")
@@ -163,6 +169,105 @@ namespace Waveify.Persistence.Migrations
                     b.ToTable("LikedSongs");
                 });
 
+            modelBuilder.Entity("Waveify.Persistence.Entities.PlaylistEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ImagePath")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Playlists");
+                });
+
+            modelBuilder.Entity("Waveify.Persistence.Entities.PlaylistSongEntity", b =>
+                {
+                    b.Property<Guid>("PlaylistId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("SongId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("PlaylistId", "SongId");
+
+                    b.HasIndex("SongId");
+
+                    b.ToTable("PlaylistSongs");
+                });
+
+            modelBuilder.Entity("Waveify.Persistence.Entities.RefreshTokenEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("Expires")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsRevoked")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshTokens");
+                });
+
+            modelBuilder.Entity("Waveify.Persistence.Entities.ReportSongEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreateAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("timezone('utc', now())");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("ReasonOfReport")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<Guid>("SongId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ReportSongs", (string)null);
+                });
+
             modelBuilder.Entity("Waveify.Persistence.Entities.SongEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -176,6 +281,9 @@ namespace Waveify.Persistence.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int>("Dislike")
+                        .HasColumnType("integer");
+
                     b.Property<TimeSpan>("Duration")
                         .HasColumnType("interval");
 
@@ -188,6 +296,12 @@ namespace Waveify.Persistence.Migrations
                         .HasColumnType("text");
 
                     b.Property<int>("Like")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ModerationStatus")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Plays")
                         .HasColumnType("integer");
 
                     b.Property<int>("Rating")
@@ -213,6 +327,34 @@ namespace Waveify.Persistence.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Songs");
+                });
+
+            modelBuilder.Entity("Waveify.Persistence.Entities.SongReactionEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsLike")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("SongId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("SongId", "UserId")
+                        .IsUnique();
+
+                    b.ToTable("SongReactions");
                 });
 
             modelBuilder.Entity("Waveify.Persistence.Entities.SubscribeEntity", b =>
@@ -287,6 +429,10 @@ namespace Waveify.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<DateTime?>("SubscriptionEnd")
                         .HasColumnType("timestamp with time zone");
 
@@ -348,6 +494,47 @@ namespace Waveify.Persistence.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Waveify.Persistence.Entities.PlaylistEntity", b =>
+                {
+                    b.HasOne("Waveify.Persistence.Entities.UserEntity", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Waveify.Persistence.Entities.PlaylistSongEntity", b =>
+                {
+                    b.HasOne("Waveify.Persistence.Entities.PlaylistEntity", "Playlist")
+                        .WithMany("PlaylistSongs")
+                        .HasForeignKey("PlaylistId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Waveify.Persistence.Entities.SongEntity", "Song")
+                        .WithMany("PlaylistSongs")
+                        .HasForeignKey("SongId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Playlist");
+
+                    b.Navigation("Song");
+                });
+
+            modelBuilder.Entity("Waveify.Persistence.Entities.RefreshTokenEntity", b =>
+                {
+                    b.HasOne("Waveify.Persistence.Entities.UserEntity", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Waveify.Persistence.Entities.SongEntity", b =>
                 {
                     b.HasOne("Waveify.Persistence.Entities.UserEntity", "User")
@@ -355,6 +542,25 @@ namespace Waveify.Persistence.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Waveify.Persistence.Entities.SongReactionEntity", b =>
+                {
+                    b.HasOne("Waveify.Persistence.Entities.SongEntity", "Song")
+                        .WithMany()
+                        .HasForeignKey("SongId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Waveify.Persistence.Entities.UserEntity", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Song");
 
                     b.Navigation("User");
                 });
@@ -375,8 +581,15 @@ namespace Waveify.Persistence.Migrations
                     b.Navigation("Subscription");
                 });
 
+            modelBuilder.Entity("Waveify.Persistence.Entities.PlaylistEntity", b =>
+                {
+                    b.Navigation("PlaylistSongs");
+                });
+
             modelBuilder.Entity("Waveify.Persistence.Entities.SongEntity", b =>
                 {
+                    b.Navigation("PlaylistSongs");
+
                     b.Navigation("Tags");
                 });
 

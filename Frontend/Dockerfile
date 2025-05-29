@@ -1,19 +1,14 @@
-# Этап сборки
-FROM node:20-slim AS builder
+# Frontend/Dockerfile
+FROM node:18
 
 WORKDIR /app
 
-COPY ./Frontend/waveify/package.json ./package.json
-COPY ./Frontend/waveify/package-lock.json ./package-lock.json
+COPY waveify/package.json ./
+COPY waveify/package-lock.json ./
 RUN npm install
 
-COPY ./Frontend/waveify .
+COPY waveify ./
+
+# Запуск сборки с подробным выводом
 RUN npm run build
-
-# Этап запуска
-FROM nginx:alpine
-
-COPY --from=builder /app/out /usr/share/nginx/html
-COPY ./Ngins/nginx.conf /etc/nginx/nginx.conf
-
-EXPOSE 80
+CMD ["npm", "start"]

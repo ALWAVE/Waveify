@@ -42,11 +42,11 @@ const MobileActionButton: React.FC<{
 
   const content = (
     <div className={classes} onClick={onClick}>
-      <div className="mt-1 text-white">{icon}</div>
+      <div className="mt-1 text-[var(--text)]">{icon}</div>
       <div className="flex flex-col text-left">
         <span className="text-sm font-semibold">{title}</span>
         {description && (
-          <span className="text-xs text-neutral-300">{description}</span>
+          <span className="text-xs text-[var(--text)]">{description}</span>
         )}
       </div>
     </div>

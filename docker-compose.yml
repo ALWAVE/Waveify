@@ -1,10 +1,10 @@
-version: '3.9'
+version: '3.9' 
 services:
   postgres:
     image: postgres:latest
     container_name: postgres
     environment:
-      POSTGRES_DB: "WaveifyDb"
+      POSTGRES_DB: "waveifydb"
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "558899ASE2005"
     volumes:
@@ -28,10 +28,10 @@ services:
 
   frontend:
     build:
-      context: .
-      dockerfile: Frontend/Dockerfile
+      context: ./Frontend  # Контекст сборки указывает на папку Frontend
+      dockerfile: Dockerfile
     ports:
-      - "3000:80"
+      - "3000:3000"
     restart: unless-stopped
 
   nginx:
@@ -40,7 +40,7 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./Ngins/nginx.conf:/etc/nginx/nginx.conf:ro  # Убедитесь, что путь правильный
+      - ./Nginx/nginx.conf:/etc/nginx/nginx.conf:ro  
     depends_on:
       - frontend
       - backend
