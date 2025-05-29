@@ -130,7 +130,7 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
                 </div>
               </div>
             ))}
-            <SearchInput />
+            {/* <SearchInput /> */}
           </div>
 
           {/* Правая часть */}

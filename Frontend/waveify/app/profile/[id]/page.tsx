@@ -88,7 +88,7 @@ const Profile = () => {
           <div className="relative aspect-square w-full h-full rounded-md overflow-hidden bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center text-white text-5xl font-bold">
             {profileUser.userName[0]}
           </div>
-
+{/* 
           <div>
             <h2 className="p-6 mb-4 text-2xl font-semibold">
               NickName: {profileUser.userName}
@@ -99,9 +99,9 @@ const Profile = () => {
             <ButtonLogin className="w-44 mt-5 ml-5 bg-purple-500 font-semibold">
               Donate
             </ButtonLogin>
-          </div>
+          </div> */}
 
-          <div className="col-span-2 sm:col-span-1 md:col-span-1">
+          {/* <div className="col-span-2 sm:col-span-1 md:col-span-1">
             <h3 className="p-6 text-base font-semibold">
               Plays: {profileUser.plays ?? 0}
               <br />
@@ -109,7 +109,7 @@ const Profile = () => {
               <br />
               Subscribers: {profileUser.subscribers ?? 0}
             </h3>
-          </div>
+          </div> */}
         </div>
 
         <h2 className="p-6 mb-4 text-3xl font-semibold">Tracks</h2>

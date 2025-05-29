@@ -6,6 +6,7 @@ import { HiHeart } from "react-icons/hi2";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
 import { useFavorites } from "@/hooks/useFavorites";
+import PageTitle from "@/component/PageTitle";
 
 const Page = () => {
   const { favorites, toggleFavorite, loadFavorites } = useFavorites();
@@ -21,6 +22,7 @@ const Page = () => {
 
   return (
     <div className="p-4 bg-[var(--bgPage)] rounded-lg w-full h-full overflow-hidden overflow-y-auto">
+      <PageTitle title="Your collection"/>
       <div className="flex items-center m-2">
         {/* Favorite block */}
         <Link className="m-2" href={"/collection/favorite"}>
@@ -31,7 +33,7 @@ const Page = () => {
           >
             <HiHeart className="text-white" size={50} />
           </div>
-          <h1>Favorite</h1>
+          <h1 className="text-[var(--text)]"  >Favorite</h1>
         </Link>
         <button
           onClick={() => handleToggle("Favorite", "Success Pin Your Favorite")}
@@ -51,7 +53,7 @@ const Page = () => {
           >
             <BsCollectionFill className="text-white" size={50} />
           </div>
-          <h1>Your Music</h1>
+          <h1 className="text-[var(--text)]" >Your Music</h1>
         </Link>
         <button
           onClick={() => handleToggle("Your Music", "Success Pin Your Music")}
@@ -62,7 +64,7 @@ const Page = () => {
           {favorites.includes("Your Music") ? "Unpin" : "Pin"}
         </button>
       </div>
-      <p>Hello, page</p>
+    
     </div>
   );
 };

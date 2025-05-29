@@ -8,17 +8,17 @@ import Header from "@/component/Header";
 const Download = () => {
   return (
    
-        <div className="bg-[var(--bgPage)] text-neutral-400 rounded-lg w-full h-full overflow-hidden overflow-y-auto">
+        <div className=" bg-[var(--bgPage)] text-neutral-400 rounded-lg w-full h-full overflow-hidden overflow-y-auto">
     {/* <Header className="bg-neutral-900">
                 <></>
              </Header> */}
       {/* Hero Section */}
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12 space-y-4">
-          <h1 className="text-4xl md:text-6xl font-bold text-white">
+          <h1 className="text-4xl md:text-6xl font-bold text-[var(--text)] mt-5">
             Download Waveify
           </h1>
-          <p className="text-xl text-white/90">
+          <p className="text-xl text-text-[var(--text)]/90">
             Your Ultimate Music Companion
           </p>
         </div>
@@ -72,7 +72,7 @@ const Download = () => {
           <div className="group hover:shadow-2xl transition-all duration-300 overflow-hidden">
             <div className="relative h-48 p-0">
               <Image
-                src="/Waveify.png"
+                src="https://wallpapers4screen.com/Uploads/8-1-2025/64784/thumb2-purple-neon-waves-black-background-lines-wave-background-neon-abstracts-light-lines-background.jpg"
                 alt="Waveify"
                 fill
                 className="object-cover transition-transform duration-300 group-hover:scale-105"
@@ -105,8 +105,8 @@ const Download = () => {
                     <span className="text-sm">Crazy Desktop App</span>
                   </div>
                 </div>
-                <ButtonLogin className="hover:scale-105 w-full bg-pink-500 hover:bg-pink-600 flex  justify-center">
-                  <DownloadIcon className="mr-2" />
+                <ButtonLogin onClick={() => { window.location.href = "https://github.com/ALWAVE/Waveify/archive/refs/heads/main.zip"}} className="hover:scale-105 w-full bg-pink-500 hover:bg-pink-600 flex  justify-center">
+                  <DownloadIcon  className="mr-2" />
                     Download Free
                 </ButtonLogin>
               </div>
@@ -116,12 +116,10 @@ const Download = () => {
 
         {/* Bottom CTA */}
         <div className="text-center">
-        <p className="text-xl text-white font-medium max-w-3xl mx-auto">
+        <p className="text-xl text-[var(--text)] font-medium max-w-3xl mx-auto">
             Выбирайте Waveify, чтобы насладиться непревзойденным звучанием музыки. Зачем соглашаться на меньшее, если можно получить все самое лучшее?
           </p>
-          <p className="text-xl text-white font-medium max-w-3xl mx-auto">
-            Choose Waveify for an unmatched music experience. Why settle for less when you can have the best?
-          </p>
+          
         </div>
       </div>
     </div>

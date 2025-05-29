@@ -209,10 +209,10 @@ const Settings = () => {
                             <h1 className="font-medium text-sm text-[var(--textPage)]">Показать все файлы на устройстве</h1>
                             <ToggleSwitch onClick={handleToggleYourFile} isChecked={showYourFile} />
                             </div>
-                            <div className="flex items-center justify-between mb-2">
+                            {/* <div className="flex items-center justify-between mb-2">
                                 <h1 className="font-medium text-sm text-[var(--textPage)]">Показать все файлы на устройстве</h1>
                                 <ToggleSwitch onClick={handleToggle} isChecked={isChecked} />
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                 </ul>

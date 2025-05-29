@@ -227,7 +227,7 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl, favorites,
           <FaBackwardStep
             onClick={handlePrev}
             size={22}
-            className="text-neutral-400 hover:text-white cursor-pointer"
+            className="text-neutral-400 hover:text-[var(-text)] cursor-pointer"
           />
           <div
             onClick={handlePlayPause}
@@ -239,7 +239,7 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl, favorites,
           <FaForwardStep
             onClick={handleNext}
             size={22}
-            className="text-neutral-400 hover:text-white cursor-pointer"
+            className="text-neutral-400 hover:text-[var(--text)] cursor-pointer"
           />
           
         </div>
