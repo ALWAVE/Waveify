@@ -25,9 +25,9 @@ export default function Home() {
         ) : (
           <PageContent songs={songs} />
         )}
-        <div className="flex justify-between items-center mt-4">
+        {/* <div className="flex justify-between items-center mt-4">
           <h1 className="text-[var(--text)] text-2xl font-semibold">Top Rating</h1>
-        </div>
+        </div> */}
       </div>
     </div>
   )

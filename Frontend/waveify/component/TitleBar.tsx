@@ -20,14 +20,14 @@ const TitleBar = () => {
 
   return (
     <div
-      className="no-drag absolute top-0 mt-3 right-0 flex select-none bg-[var(--bg)] "
+      className="no-drag absolute top-0 mt-4 right-0 flex select-none bg-[var(--bg)] "
   
     >
 
-      <button id="minimize-btn" className="rounded-r-lg px-3 py-2 text-[var(--text)] hover:bg-neutral-700" onClick={handleMinimize}>
+      <button id="minimize-btn" className="rounded-r-lg px-3 py-2 text-[var(--text)] hover:bg-[var(--text)]/30" onClick={handleMinimize}>
         <BsDashLg size={17} />
       </button>
-      <button id="maximize-btn" className="rounded-l-lg rounded-r-lg px-3 py-2 text-[var(--text)] hover:bg-orange-400" onClick={handleMaximize}>
+      <button id="maximize-btn" className="rounded-b-lg rounded-t-lg px-3 py-2 text-[var(--text)] hover:bg-[var(--text)]/30" onClick={handleMaximize}>
         <IoIosSquareOutline size={17} />
       </button>
       <button id="close-btn" className="rounded-l-lg px-3 py-2 text-xl text-[var(--text)] bg-transparent hover:bg-red-600 transition" onClick={handleClose}>
