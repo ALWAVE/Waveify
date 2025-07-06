@@ -1,0 +1,217 @@
+@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+:root {
+  height: 100%;
+  background-color: black;
+  color-scheme: dark;
+  user-select: none; 
+  -webkit-user-select: none; /* Для Safari */
+  -ms-user-select: none; /* Для старого Edge */
+  --bg: black;
+  --bgPage: #171717; 
+  --text: white;
+  --bgProfile: #262626;
+  --bgButton: #404040;
+  --textNoHover: #d4d4d4;
+  --textActive: white;
+  --textBW: black;
+  --lightRose: white;
+}
+
+.theme-light {
+  --bg: white;
+  --bgPage: #f5f5f5; 
+  --text: black;
+  --bgButton: #e5e5e5;
+  --bgProfile: #f0f0f0;
+  --textNoHover: #d4d4d4;
+  --textActive: black;
+  --lightRose: #ff1764;
+  --textBW: white;
+  
+}
+
+.theme-woody {
+  --bg: #1a1a1a;
+  --text: white;
+  --bgButton: #404040;
+  --bgProfile: #262626;
+  --textNoHover: #d4d4d4;
+  --bgPage: #171717; 
+  --textActive: white;
+  --textBW: black;
+  --lightRose: white;
+}
+.theme-brown {
+  --bg: #6b3f10;
+  --text: white;
+  --bgButton: #4b210a;
+  --bgProfile: #4b210a;
+  --textNoHover: #d4d4d4;
+  --bgPage: #4b210a; 
+  --textActive: white;
+  --textBW: black;
+  --lightRose: white;
+}
+.theme-agressive {
+  --bg: #660909;
+  --text: white;
+  --bgButton: #490505;
+  --bgProfile: #490505;
+  --textNoHover: #d4d4d4;
+  --bgPage: #490505; 
+  --textActive: white;
+  --textBW: black;
+  --lightRose: white;
+}
+.theme-blackedition {
+  --bg: black;
+  --text: white;
+  --bgButton: black;
+  --bgProfile: black;
+  --textNoHover: black;
+  --bgPage: black; 
+  --textActive: white;
+  --textBW: black;
+  --lightRose: white;
+}
+
+.theme-premium {
+  --bg:#ae69ce; 
+  --text: white;
+  --bgButton: #404040;
+  --bgProfile: #9426af;
+  --textNoHover: #d4d4d4;
+  --bgPage: #8526a1; 
+  --gradientBg: linear-gradient(45deg, #9b4dff, #ff2a7e); 
+  --textActive: white;
+  --textBW: black;
+  --lightRose: white;
+}
+
+.theme-bright {
+  --bg: #62061d;
+  --text: white;
+  --bgButton: #920c2e;
+  --bgProfile: #920c2e;
+  --textNoHover: #d4d4d4;
+  --bgPage: #920c2e; 
+  --textActive: white;
+  --textBW: black;
+  --lightRose: white;
+}
+.theme-bright {
+  --bg: #62061d;
+  --text: white;
+  --bgButton: #920c2e;
+  --bgProfile: #920c2e;
+  --textNoHover: #d4d4d4;
+  --bgPage: #920c2e; 
+  --textActive: white;
+  --textBW: black;
+  --lightRose: white;
+}
+.theme-ocean {
+  --bg: #6e1385;
+  --text: white;
+  --bgButton: #4e0b5f ;
+  --bgProfile: #4e0b5f ;
+  --textNoHover: #d4d4d4;
+  --bgPage: #4e0b5f ; 
+  --textActive: white;
+  --textBW: black;
+  --lightRose: white;
+}
+.theme-brown {
+  --bg: #6b3f10;
+  --text: white;
+  --bgButton: #4b210a;
+  --bgProfile: #4b210a;
+  --textNoHover: #d4d4d4;
+  --bgPage: #4b210a; 
+  --textActive: white;
+  --textBW: black;
+  --lightRose: white;
+}
+.theme-friend {
+  --bg: #3d1361;
+  --text: white;
+  --bgButton: #210936;
+  --bgProfile: #210936;
+  --textNoHover: #d4d4d4;
+  --bgPage: #210936; 
+  --textActive: white;
+  --textBW: white;
+  --lightRose: #a13df8;
+}
+img {
+  max-width: 100%;
+  border-radius: 8px;
+}
+.drag-region {
+  -webkit-app-region: drag;
+}
+.no-drag {
+  -webkit-app-region: no-drag;
+}
+
+.custom-radio {
+  appearance: none; /* Убираем стандартный стиль */
+  width: 16px; /* Ширина */
+  height: 16px; /* Высота */
+  border: 2px solid #ccc; /* Цвет рамки */
+  border-radius: 50%; /* Скругление для создания круга */
+  outline: none; /* Убираем контур */
+  cursor: pointer; /* Курсор при наведении */
+}
+
+.custom-radio:checked {
+  background-color: #b3133b; /* Цвет фона при выборе */
+  border: 2px solid #ff2056; /* Цвет рамки при выборе */
+}
+
+.custom-radio:focus {
+  box-shadow: 0 0 0 2px rgba(255, 0, 0, 0.5); /* Эффект при фокусе */
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  10% {
+    transform: translateX(0%);
+  }
+  45% {
+    transform: translateX(-100%);
+  }
+  55% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(0%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 8s ease-in-out infinite;
+}
+
+
+@layer utilities {
+  .animate-loader {
+    animation: loader-slide 1.5s linear infinite;
+  }
+
+  @keyframes loader-slide {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+}

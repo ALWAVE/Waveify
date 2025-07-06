@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Заглушка</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: black;
+            color: white;
+            font-family: 'Montserrat', sans-serif; /* Шрифт Montserrat */
+            overflow: hidden;
+            text-align: center;
+            -webkit-user-select: none; 
+            user-select: none; /* Запретить выделение текста и изображений */
+        }
+
+      
+
+        .logo {
+            width: 40px; /* Ширина логотипа */
+            margin-bottom: 20px;
+            -webkit-user-select: none; 
+            user-select: none; 
+        }
+
+        .loading-text {
+            font-size: 14px;
+            margin-bottom: 20px;
+            animation: fadeIn 1s infinite alternate;
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .progress-bar {
+            width: 100%;
+            background-color: #444;
+            border-radius: 5px;
+            overflow: hidden;
+            height: 10px;
+            position: relative;
+        }
+
+        .progress {
+            height: 100%;
+            background-color: #F43F5E; /* Цвет прогресс-бара */
+            animation: loading 5s linear forwards;
+        }
+
+        @keyframes loading {
+            from { width: 0%; }
+            to { width: 100%; }
+        }
+
+        .spinner {
+            border: 8px solid rgba(255, 255, 255, 0.3);
+            border-top: 8px solid #F43F5E;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <img src="../public/Waveify_Logo.png" alt="Логотип" class="logo"> <!-- Замените на путь к вашему логотипу -->
+        <div class="loading-text">Cheaking updating...</div>
+        <div class="progress-bar">
+            <div class="progress"></div>
+        </div>
+        <div class="spinner"></div>
+    </div>
+</body>
+</html>

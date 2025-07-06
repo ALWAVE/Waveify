@@ -1,0 +1,451 @@
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    color: white;
+    overflow-x: hidden;
+    position: relative; /* Ensure ::before works properly */
+    background: linear-gradient(135deg, #1f1f1f, #141414, #C96287, #000, #000); /* Base gradient */
+    background-size: 300% 300%;
+    animation: gradientShift 6s ease infinite;
+}
+
+    /* Background Particles Effect */
+    body::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0));
+        opacity: 0.3; /* Adjust transparency */
+        pointer-events: none;
+        z-index: 0; /* Ensure it’s behind other elements */
+        animation: particles 10s linear infinite;
+    }
+    body::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        background-image: radial-gradient(circle, rgba(255, 255, 255, 0.5) 2px, transparent 2px);
+        background-size: 50px 50px;
+        opacity: 0;
+        animation: stars 6s ease infinite, fadeInOut 6s ease-in-out infinite;
+        z-index: 0;
+    }
+
+/* Анимация движения звездочек */
+@keyframes stars {
+    0% {
+        background-position: 0% 0%;
+    }
+
+    50% {
+        background-position: 50% 50%;
+    }
+
+    100% {
+        background-position: 100% 100%;
+    }
+}
+
+/* Анимация появления и исчезновения */
+@keyframes fadeInOut {
+    0%, 100% {
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 0.3;
+    }
+}
+/* Gradient Animation */
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Particles Animation */
+@keyframes particles {
+    0% {
+        transform: translate(0, 0);
+    }
+
+    50% {
+        transform: translate(20px, 20px);
+    }
+
+    100% {
+        transform: translate(0, 0);
+    }
+}
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+}
+
+a {
+    text-decoration: none;
+    transition: all 0.3s ease-in-out;
+}
+
+    a:hover {
+        color: #00d1b2;
+    }
+
+/* Buttons */
+.btn-primary {
+    background: #fff; /* Новый цвет фона */
+    border: none;
+    color: white;
+    transition: all 0.3s ease-in-out;
+}
+
+    .btn-primary:hover {
+        background: #e74c3c; /* Цвет фона при наведении */
+        box-shadow: 0 4px 10px rgba(255, 87, 51, 0.5);
+    }
+
+/* Footer */
+.footer {
+    background: #000 !important;
+    color: rgba(255, 255, 255, 0.8); /* Make text a bit brighter */
+    padding: 2.5rem 4rem; /* Increase vertical padding */
+    font-size: 1.2rem; /* Increase font size */
+}
+
+    .footer a {
+        color: rgba(255, 255, 255, 1); /* Make links more visible */
+        text-decoration: none;
+        transition: color 0.3s ease-in-out;
+    }
+
+        .footer a:hover {
+            color: #C96287; /* Color on hover */
+        }
+@property --pos-x {
+    syntax: '<percentage>';
+    initial-value: 11.14%;
+    inherits: false;
+}
+
+@property --pos-y {
+    syntax: '<percentage>';
+    initial-value: 140%;
+    inherits: false;
+}
+
+@property --spread-x {
+    syntax: '<percentage>';
+    initial-value: 150%;
+    inherits: false;
+}
+
+@property --spread-y {
+    syntax: '<percentage>';
+    initial-value: 180.06%;
+    inherits: false;
+}
+
+@property --color-1 {
+    syntax: '<color>';
+    initial-value: #000;
+    inherits: false;
+}
+
+@property --color-2 {
+    syntax: '<color>';
+    initial-value: #08012C;
+    inherits: false;
+}
+
+@property --color-3 {
+    syntax: '<color>';
+    initial-value: #4E1E40;
+    inherits: false;
+}
+
+@property --color-4 {
+    syntax: '<color>';
+    initial-value: #70464E;
+    inherits: false;
+}
+
+@property --color-5 {
+    syntax: '<color>';
+    initial-value: #88394C;
+    inherits: false;
+}
+
+@property --stop-1 {
+    syntax: '<percentage>';
+    initial-value: 37.35%;
+    inherits: false;
+}
+
+@property --stop-2 {
+    syntax: '<percentage>';
+    initial-value: 61.36%;
+    inherits: false;
+}
+
+@property --stop-3 {
+    syntax: '<percentage>';
+    initial-value: 78.42%;
+    inherits: false;
+}
+
+@property --stop-4 {
+    syntax: '<percentage>';
+    initial-value: 89.52%;
+    inherits: false;
+}
+
+@property --stop-5 {
+    syntax: '<percentage>';
+    initial-value: 100%;
+    inherits: false;
+}
+
+.crazybtn {
+    border-radius: 11px;
+    border: none;
+    padding: 16px 32px;
+    min-width: 120px;
+    font-size: 16px;
+    line-height: 1;
+    font-weight: 500;
+    font-family: inherit;
+    margin-left: 15px;
+    color: white;
+    position: relative;
+    cursor: pointer;
+    appearance: none;
+    background: radial-gradient(var(--spread-x) var(--spread-y) at var(--pos-x) var(--pos-y), var(--color-1) var(--stop-1), var(--color-2) var(--stop-2), var(--color-3) var(--stop-3), var(--color-4) var(--stop-4), var(--color-5) var(--stop-5));
+    text-shadow: 0 .5px 1px rgba(0, 0, 0, .75);
+    box-shadow: 0 0 0 1px inset rgba(255, 255, 255, 0.1);
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: --pos-x 0.5s, --pos-y 0.5s, --spread-x 0.5s, --spread-y 0.5s, --color-1 0.5s, --color-2 0.5s, --color-3 0.5s, --color-4 0.5s, --color-5 0.5s, --stop-1 0.5s, --stop-2 0.5s, --stop-3 0.5s, --stop-4 0.5s, --stop-5 0.5s;
+}
+
+    .crazybtn:hover {
+        --pos-x: 0%;
+        --pos-y: 91.51%;
+        --spread-x: 120.24%;
+        --spread-y: 103.18%;
+        --color-1: #C96287;
+        --color-2: #C66C64;
+        --color-3: #CC7D23;
+        --color-4: #37140A;
+        --color-5: #000;
+        --stop-1: 0%;
+        --stop-2: 8.8%;
+        --stop-3: 21.44%;
+        --stop-4: 71.34%;
+        --stop-5: 85.76%;
+    }
+
+.newbtn {
+    background: linear-gradient(135deg, #C96287, #C66C64, #CC7D23);
+    color: white;
+    padding: 12px 28px;
+    font-size: 16px;
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2), inset 0 0 0 2px rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+    .newbtn:hover {
+        background: linear-gradient(135deg, #CC7D23, #C66C64, #C96287);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .newbtn:active {
+        transform: scale(0.98);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    .newbtn::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        transform: scale(0);
+        transition: 0.3s ease;
+        z-index: -1;
+        pointer-events: none;
+    }
+
+    .newbtn:hover::after {
+        transform: scale(2);
+        opacity: 0;
+    }
+
+
+
+header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.navbar {
+    background: #000000 !important; /* Solid black background */
+    padding: 1.5rem 4rem; /* Add more padding top and bottom */
+}
+
+/* Увеличение размера бренда */
+.navbar-brand {
+    font-size: 2rem; /* Увеличиваем размер шрифта */
+}
+
+/* Увеличение кнопок в navbar */
+.navbar-nav .nav-item .btn-custom {
+    color: white;
+    padding: 12px 24px; /* Увеличиваем padding для кнопок */
+    border-radius: 30px;
+    margin-right: 15px; /* Добавляем пространство между кнопками */
+    font-weight: 600;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #C96287, #C66C64);
+    border: none;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #C66C64, #C96287);
+        transform: scale(1.05);
+    }
+
+/* Burger Menu */
+.menu-toggle {
+    display: none;
+}
+
+.menu-button {
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 55px;
+    height: 30px;
+    cursor: pointer;
+    position: relative;
+}
+
+.line {
+    width: 100%;
+    height: 5px;
+    background: #fff;
+    transition: all 0.3s ease;
+    border-radius: 4px;
+}
+
+.menu-toggle:checked + .menu-button .line:nth-child(1) {
+    transform: rotate(45deg) translateY(17px);
+    background: #C96287;
+}
+
+.menu-toggle:checked + .menu-button .line:nth-child(2) {
+    opacity: 0;
+}
+
+.menu-toggle:checked + .menu-button .line:nth-child(3) {
+    transform: rotate(-45deg) translateY(-17px);
+    background: #C96287;
+}
+
+/* Sidebar Panel */
+.sidebar {
+    position: fixed;
+    top: 0;
+    right: -250px;
+    width: 250px;
+    height: 100%;
+    background: #141414;
+    box-shadow: -4px 0px 10px rgba(0, 0, 0, 0.3);
+    transition: right 0.3s ease-in-out;
+    padding: 2rem 1rem;
+    z-index: 999;
+    overflow-y: auto;
+}
+
+    .sidebar.open {
+        right: 0;
+    }
+
+    .sidebar a {
+        display: block;
+        margin: 1rem 0;
+        color: #fff;
+        font-weight: bold;
+        text-decoration: none;
+        transition: color 0.3s ease-in-out;
+    }
+
+        .sidebar a:hover {
+            color: #C96287;
+        }
+
+
+/* Стили для кнопки "Начать" */
+.btn-primary {
+    background: linear-gradient(135deg, #00d1b2, #00bfa5);
+    color: white;
+    padding: 12px 28px;
+    font-size: 16px;
+    border: none;
+    border-radius: 50px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+    font-weight: bold;
+    transition: 0.3s ease;
+}
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #00bfa5, #00d1b2);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn-primary:active {
+        transform: scale(0.98);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    }
+
+
+
+    .btn-custom {
+    background-color: none; /* Tomato red */
+    border-color: none; /* Tomato red border */
+}
+
+        .btn-custom:hover {
+            background-color: none; /* Darker tomato on hover */
+            border-color: #ff1271;
+        }
+

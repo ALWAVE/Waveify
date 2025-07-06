@@ -1,0 +1,40 @@
+# Build results
+[Dd]ebug/
+[Rr]elease/
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio files
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Rider files
+.idea/
+
+# ASP.NET Core specific files
+project.lock.json
+project.fragment.lock.json
+WaveifyWeb/WaveifyWeb/appsettings.json
+appsettings.json
+*.db
+*.db-shm
+*.db-wal
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+*.cache
+
+# NPM packages
+node_modules/
+package-lock.json
+
+# User-specific files
+*.sln.ide
+*.sln.docstates
