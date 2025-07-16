@@ -27,7 +27,7 @@ const SongItem: React.FC<SongItemProps> = ({ data }) => {
   const imageSrc = data?.imagePath && data.imagePath.trim() !== ""
     ? data.imagePath
     : "/music-placeholder.jpg";
-
+  // bg-neutral-400/5 
   return (
     <div
       // onClick={() => onPlay(data.id)}
@@ -40,8 +40,8 @@ const SongItem: React.FC<SongItemProps> = ({ data }) => {
         justify-center 
         rounded-md 
         overflow-hidden 
-        gap-x-4 
-        bg-neutral-400/5 
+        gap-x-4
+        bg-transparent 
         cursor-pointer 
         hover:bg-neutral-400/10 
         transition 
@@ -75,7 +75,7 @@ const SongItem: React.FC<SongItemProps> = ({ data }) => {
           className="
             text-neutral-400 
             text-sm 
-            pb-4 
+            pb-2 
             w-full 
             truncate
           "

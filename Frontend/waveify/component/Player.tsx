@@ -28,7 +28,7 @@ const Player = () => {
 
   // Иначе показываем обычный плеер
   return (
-    <div className="fixed bottom-0 bg-[var(--bg)] w-full py-2 h-[80px] px-4 z-50">
+    <div className="fixed bottom-0 bg-[var(--bg)]  w-full py-2 h-[80px] px-4 z-50">
       <PlayerContent  key={player.activeId} song={song} songUrl={songUrl} />
     </div>
   )

@@ -1,4 +1,4 @@
-const page = () => {
+const AllSongs = () => {
     return (
         <div>
             Hello, page
@@ -6,4 +6,4 @@ const page = () => {
     );
 };
 
-export default page;
+export default AllSongs;

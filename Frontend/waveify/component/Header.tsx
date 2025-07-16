@@ -129,13 +129,13 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
           </div>
 
           {/* Центр */}
-          <div id="nav-center" className="flex gap-x-2 items-center justify-center flex-1 mr-2">
+          <div id="nav-center" className="flex gap-x-2 items-center justify-center mr-2 relative w-full max-w-lg ">
             {route.map((item) => (
               <div key={item.label} className="drag-region">
                 <div className="no-drag">
                   <SidebarItem
-                    textColorActive="black"
-                    className={twMerge(`rounded-full hover:scale-105 transition-all duration-300`)}
+                    textColorActive="[var(--bg)]"
+                    className={twMerge(`rounded-full hover:scale-105 transition-all duration-100`)}
                     positionToolTipe="bottom"
                     {...item}
                   />
@@ -152,7 +152,7 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
                 href="/explore"
                 active={pathname.startsWith("/explore")}
                 positionToolTipe="bottom"
-                className={twMerge("rounded-full hover:scale-105")}
+                className={twMerge("rounded-full hover:scale-105 no-drag")}
                 textColorActive="black"
               />
             )}

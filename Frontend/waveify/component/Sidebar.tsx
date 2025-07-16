@@ -132,6 +132,7 @@ const Sidebar: React.FC<SidebarProps> = () => {
                   iconActive={<LuLibrary size={26} />}
                   href="/collection"
                   positionToolTipe="right"
+                  textColorActive="[var(--bg)]"
                 />
                 
               )}
@@ -146,7 +147,7 @@ const Sidebar: React.FC<SidebarProps> = () => {
                   href="/collection/favorite"
                   icon={<IoHeartOutline size={26} />}
                   iconActive={<HiHeart size={26} />}
-                  textColorActive="text-rose-900"
+                  textColorActive="rose-900"
                   positionToolTipe="right"
                 />
               )}

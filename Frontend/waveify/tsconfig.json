@@ -22,6 +22,6 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["electron", "main.ts", "preload.ts","next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "tailwind.config.js","src/**/*.ts", "desktop/**/*.ts"],
+  "include": ["electron", "main.ts", "preload.ts","next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "tailwind.config.js","src/**/*.ts", "desktop/**/*.ts", "desktop/preload.js", "desktop/main.js"],
   "exclude": ["node_modules"]
 }

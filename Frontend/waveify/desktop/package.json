@@ -1,14 +1,16 @@
 {
-  "name": "desktop",
+  "name": "waveify",
   "version": "1.0.0",
-  "main": "index.ts",
+  "main": "main.js",
+ 
+  
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "Ukraincev Artem Alekseevich",
   "license": "ISC",
-  "description": "",
+  "description": "Waveify Music Player",
   "dependencies": {
     "electron": "^35.0.2",
     "electron-builder": "^25.1.8"

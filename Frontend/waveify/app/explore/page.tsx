@@ -111,8 +111,9 @@ const ExplorePage = () => {
             {loading ? (
                 <p className="text-neutral-400">Загрузка...</p>
             ) : songs.length === 0 ? (
-                <p className="text-neutral-400">Ничего не найдено по вашему запросу.</p>
+                <p className="text-neutral-400 ">Ничего не найдено по вашему запросу.</p>
             ) : (
+                
                 <PageContent songs={songs} />
             )}
         </div>

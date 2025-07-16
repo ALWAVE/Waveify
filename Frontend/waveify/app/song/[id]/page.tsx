@@ -80,15 +80,15 @@ const SongPage = () => {
           <div className="flex flex-col">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-2 text-[var(--text)]">{song.title}</h1>
             <div>
-              <span className="cursor-pointer hover:underline relative group text-[var(--text)]">{song.author}
+              <Link href={`/explore?query=${song.author}`} className="cursor-pointer hover:underline relative group text-[var(--text)]">{song.author}
                 <Tooltip label={`Search: ${song.author}`} position="bottom" />
-              </span>
+              </Link>
               <span className="text-[var(--text)]"> • {song.createAt ? new Date(song.createAt).toLocaleDateString('en-En', { year: 'numeric', month: 'long', day: 'numeric' }) : ""}
               </span>
             </div>
             <span className="text-sm text-neutral-400 mt-6">Длительность: {song.duration}</span>
             <Link href={`/profile/${song.userId}`} className="text-neutral-500 hover:underline hover:text-[var(--text)] cursor-pointer transition ">
-              Link Author
+              Go to the author's profile
             </Link>
           </div>
         </div>
