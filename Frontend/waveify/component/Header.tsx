@@ -129,13 +129,13 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
           </div>
 
           {/* Центр */}
-          <div id="nav-center" className="flex gap-x-2 items-center justify-center mr-2 relative w-full max-w-lg ">
+          <div id="nav-center" className="flex gap-x-2 items-center justify-center mr-2 ml-2 relative w-full max-w-lg ">
             {route.map((item) => (
               <div key={item.label} className="drag-region">
                 <div className="no-drag">
                   <SidebarItem
                     textColorActive="[var(--bg)]"
-                    className={twMerge(`rounded-full hover:scale-105 transition-all duration-100`)}
+                    className={twMerge(`rounded-full hover:scale-103 transition-all duration-100 active:scale-98 hover:opacity-85`)}
                     positionToolTipe="bottom"
                     {...item}
                   />

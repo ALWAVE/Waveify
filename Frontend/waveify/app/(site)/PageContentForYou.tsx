@@ -1,6 +1,7 @@
 "use client";
 
 import SongItem from "@/component/SongItem";
+import useOnPlay from "@/hooks/useOnPlay";
 import { SongWithListenCount } from "@/models/SongWithListenCount";
 import React from "react";
 
@@ -9,6 +10,7 @@ interface PageContentForYouProps {
 }
 
 const PageContentForYou: React.FC<PageContentForYouProps> = ({ songs }) => {
+    const onPlay = useOnPlay(songs);
   const topUnique = Array.from(
     new Map(
       songs
@@ -36,7 +38,7 @@ const PageContentForYou: React.FC<PageContentForYouProps> = ({ songs }) => {
         gap-4 
         mt-4">
       {topUnique.map(item => (
-        <SongItem key={item.id} data={item} />
+        <SongItem key={item.id} data={item} onPlay={onPlay} />
       ))}
     </div>
   );

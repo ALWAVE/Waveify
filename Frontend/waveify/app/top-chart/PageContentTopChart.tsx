@@ -1,6 +1,7 @@
 "use client";
 
 import SongItem from "@/component/SongItem";
+import useOnPlay from "@/hooks/useOnPlay";
 import { Song } from "@/models/Song";
 import React from "react";
 import { IoHeart } from "react-icons/io5";
@@ -16,6 +17,7 @@ const specialTitles = [
 ];
 
 const PageContentTopChart: React.FC<PageContentTopChartProps> = ({ songs }) => {
+    const onPlay = useOnPlay(songs);
   if (!songs.length) {
     return <div className="mt-4 text-neutral-400">No top chart songs available.</div>;
   }
@@ -53,7 +55,7 @@ const PageContentTopChart: React.FC<PageContentTopChartProps> = ({ songs }) => {
             <IoHeart className="mr-1" /> {item.like}
           </div>
 
-          <SongItem key={item.id} data={item} />
+          <SongItem key={item.id} data={item} onPlay={onPlay}/>
         </div>
       ))}
     </div>

@@ -1,37 +1,24 @@
-"use client";
-
 import Image from "next/image";
-import useOnPlay from "@/hooks/useOnPlay";
-import usePlayer from "@/hooks/usePlayer"; // Импортируем хук состояния плеера
-
+import usePlayer from "@/hooks/usePlayer";
 import PlayButton from "./PlayButton";
-
 import { Song } from "@/models/Song";
 import SmartLink from "./SmartLink";
 
-
-
-
 interface SongItemProps {
   data: Song;
+  onPlay: (id: string) => void;
 }
 
-const SongItem: React.FC<SongItemProps> = ({ data }) => {
-  const onPlay = useOnPlay([data]);
-  const player = usePlayer(); // Получаем состояние плеера
+const SongItem: React.FC<SongItemProps> = ({ data, onPlay }) => {
+  const player = usePlayer();
 
-  // Проверяем, является ли текущий трек активным и воспроизводится ли он
   const isPlaying = player.activeId === data.id && player.isPlaying;
-
-  // Путь к изображению
   const imageSrc = data?.imagePath && data.imagePath.trim() !== ""
     ? data.imagePath
     : "/music-placeholder.jpg";
-  // bg-neutral-400/5 
+
   return (
-    <div
-      // onClick={() => onPlay(data.id)}
-      className="
+    <div className="
         relative 
         group 
         flex 
@@ -48,8 +35,7 @@ const SongItem: React.FC<SongItemProps> = ({ data }) => {
         p-3
       "
     >
-      <div
-        className="
+      <div className="
           relative 
           aspect-square 
           w-full
@@ -66,22 +52,11 @@ const SongItem: React.FC<SongItemProps> = ({ data }) => {
             className="object-cover rounded-md"
           />
         </SmartLink>
-
       </div>
 
       <div onClick={() => onPlay(data.id)} className=" flex flex-col items-start w-full pt-4 gap-y-1">
         <p className="font-semibold text-[var(--text)] truncate w-full">{data.title}</p>
-        <p
-          className="
-            text-neutral-400 
-            text-sm 
-            pb-2 
-            w-full 
-            truncate
-          "
-        >
-          {data.author}
-        </p>
+        <p className="text-neutral-400 text-sm pb-2 w-full truncate">{data.author}</p>
       </div>
 
       {/* Кнопка воспроизведения */}
@@ -89,24 +64,17 @@ const SongItem: React.FC<SongItemProps> = ({ data }) => {
         <div
           onClick={(e) => {
             e.stopPropagation();
-            onPlay(data.id); // Запускаем песню
-          }}
-        >
-         <PlayButton
-          isPlaying={isPlaying}
-          onClick={() => {
             onPlay(data.id);
           }}
-          className="p-4 active:scale-85"
-        />
+        >
+          <PlayButton
+            isPlaying={isPlaying}
+            onClick={() => onPlay(data.id)}
+            className="p-4 active:scale-85"
+          />
         </div>
       </div>
-
-      {/* Рейтинг песни */}
-      <div className="absolute top-0">
-        {/* <SongRating /> */}
-        {/* <SongLikeButton songId = {data.id} /> */}
-      </div>
+      <div className="absolute top-0">{/* ... */}</div>
     </div>
   );
 };

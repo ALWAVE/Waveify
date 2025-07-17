@@ -10,6 +10,8 @@ import { AuthProvider } from "@/providers/AuthProvider";
 import ToasterProvider from "@/providers/ToasterProvider";
 import AuthPoster from "@/component/AuthPoster";
 import CookieConsent from "@/component/CookieConsent";
+import DisableContextMenu from "@/component/DisableContextMenu";
+
 
 const figtree = Figtree({ subsets: ["latin"] })
 
@@ -39,6 +41,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>
       <body className={`bg-[var(--bg)] ${figtree.className}`}>
+          <DisableContextMenu />
         <ToasterProvider />
 
         <AuthProvider>

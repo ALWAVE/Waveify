@@ -28,7 +28,7 @@ const PlayButtonVisible: React.FC<PlayButtonVisibleProps> = ({
         ${className ?? ""}
       `}
     >
-       {isPlaying ? (
+      {isPlaying ? (
         <FaPause className="text-black" />
       ) : (
         <FaPlay className="text-black" />

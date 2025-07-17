@@ -37,6 +37,7 @@ const usePlayer = create<PlayerStore>((set) => ({
     const volume = storedVolume ? parseFloat(storedVolume) : 1;
     set({ volume, volumeLoaded: true });
   },
+  stop: () => set({ isPlaying: false, activeId: undefined }),
 }));
 
 export default usePlayer;

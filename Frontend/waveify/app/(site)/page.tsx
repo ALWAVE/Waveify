@@ -50,7 +50,7 @@ export default function Home() {
   };
 
   return (
-    <div className="bg-[var(--bgPage)] text-neutral-400 rounded-lg w-full h-full overflow-hidden overflow-y-auto pl-20">
+    <div className="bg-[var(--bgPage)] text-neutral-400 rounded-lg w-full h-full overflow-hidden overflow-y-auto md:pl-20">
 
       <div className="px-4 pb-2 pt-4">
         <div className="flex justify-between items-center">
