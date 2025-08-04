@@ -20,12 +20,10 @@ import { RiFileMusicLine } from "react-icons/ri";
 import { RiFileMusicFill } from "react-icons/ri";
 import { BsCollection } from "react-icons/bs";
 import useUploadBeatModal from "@/hooks/useUploadBeatModal";
-import { PiWavesLight } from "react-icons/pi";
-import { PiWavesFill } from "react-icons/pi";
 import { TiSocialYoutube } from "react-icons/ti";
 import { LuYoutube } from "react-icons/lu";
 import { IoHeartOutline } from "react-icons/io5";
-import { GoHome, GoHomeFill } from "react-icons/go";
+import { MdFavorite } from "react-icons/md";
 import { useAuth } from "@/providers/AuthProvider"; // Импортируйте контекст авторизации
 import { LuChartNoAxesColumn } from "react-icons/lu";
 interface SidebarProps {
@@ -145,7 +143,7 @@ const Sidebar: React.FC<SidebarProps> = () => {
                   label="Favorite"
                   active={pathname === "/collection/favorite"}
                   href="/collection/favorite"
-                  icon={<IoHeartOutline size={26} />}
+                  icon={<MdFavorite size={26} />}
                   iconActive={<HiHeart size={26} />}
                   textColorActive="rose-900"
                   positionToolTipe="right"

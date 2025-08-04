@@ -10,11 +10,16 @@
   height: 100%;
   background-color: black;
   color-scheme: dark;
-  user-select: none; 
-  -webkit-user-select: none; /* Для Safari */
-  -ms-user-select: none; /* Для старого Edge */
+  user-select: none;
+  -webkit-user-select: none;
+  /* Для Safari */
+  -ms-user-select: none;
+  /* Для старого Edge */
+  --input-hover: rgba(255, 255, 255, 0.025);
+  /* input/filter bar hover — для черного */
+  --dropdown-hover: rgba(255, 255, 255, 0.05);
   --bg: black;
-  --bgPage: #171717; 
+  --bgPage: #171717;
   --text: white;
   --bgProfile: #262626;
   --bgButton: #404040;
@@ -26,7 +31,7 @@
 
 .theme-light {
   --bg: white;
-  --bgPage: #f5f5f5; 
+  --bgPage: #f5f5f5;
   --text: black;
   --bgButton: #e5e5e5;
   --bgProfile: #f0f0f0;
@@ -34,7 +39,9 @@
   --textActive: black;
   --lightRose: #ff1764;
   --textBW: white;
-  
+  --input-hover: rgba(30,30,40,0.05);  
+  --dropdown-hover: rgba(30,30,40,0.08);
+
 }
 
 .theme-woody {
@@ -43,53 +50,56 @@
   --bgButton: #404040;
   --bgProfile: #262626;
   --textNoHover: #d4d4d4;
-  --bgPage: #171717; 
+  --bgPage: #171717;
   --textActive: white;
   --textBW: black;
   --lightRose: white;
 }
+
 .theme-brown {
   --bg: #6b3f10;
   --text: white;
   --bgButton: #4b210a;
   --bgProfile: #4b210a;
   --textNoHover: #d4d4d4;
-  --bgPage: #4b210a; 
+  --bgPage: #4b210a;
   --textActive: white;
   --textBW: black;
   --lightRose: white;
 }
+
 .theme-agressive {
   --bg: #660909;
   --text: white;
   --bgButton: #490505;
   --bgProfile: #490505;
   --textNoHover: #d4d4d4;
-  --bgPage: #490505; 
+  --bgPage: #490505;
   --textActive: white;
   --textBW: black;
   --lightRose: white;
 }
+
 .theme-blackedition {
   --bg: black;
   --text: white;
   --bgButton: black;
   --bgProfile: black;
   --textNoHover: black;
-  --bgPage: black; 
+  --bgPage: black;
   --textActive: white;
   --textBW: black;
   --lightRose: white;
 }
 
 .theme-premium {
-  --bg:#ae69ce; 
+  --bg: #ae69ce;
   --text: white;
   --bgButton: #404040;
   --bgProfile: #9426af;
   --textNoHover: #d4d4d4;
-  --bgPage: #8526a1; 
-  --gradientBg: linear-gradient(45deg, #9b4dff, #ff2a7e); 
+  --bgPage: #8526a1;
+  --gradientBg: linear-gradient(45deg, #9b4dff, #ff2a7e);
   --textActive: white;
   --textBW: black;
   --lightRose: white;
@@ -101,98 +111,136 @@
   --bgButton: #920c2e;
   --bgProfile: #920c2e;
   --textNoHover: #d4d4d4;
-  --bgPage: #920c2e; 
+  --bgPage: #920c2e;
   --textActive: white;
   --textBW: black;
   --lightRose: white;
 }
+
 .theme-bright {
   --bg: #62061d;
   --text: white;
   --bgButton: #920c2e;
   --bgProfile: #920c2e;
   --textNoHover: #d4d4d4;
-  --bgPage: #920c2e; 
+  --bgPage: #920c2e;
   --textActive: white;
   --textBW: black;
   --lightRose: white;
 }
+
 .theme-ocean {
   --bg: #6e1385;
   --text: white;
-  --bgButton: #4e0b5f ;
-  --bgProfile: #4e0b5f ;
+  --bgButton: #4e0b5f;
+  --bgProfile: #4e0b5f;
   --textNoHover: #d4d4d4;
-  --bgPage: #4e0b5f ; 
+  --bgPage: #4e0b5f;
   --textActive: white;
   --textBW: black;
   --lightRose: white;
 }
+
 .theme-brown {
   --bg: #6b3f10;
   --text: white;
   --bgButton: #4b210a;
   --bgProfile: #4b210a;
   --textNoHover: #d4d4d4;
-  --bgPage: #4b210a; 
+  --bgPage: #4b210a;
   --textActive: white;
   --textBW: black;
   --lightRose: white;
 }
+
 .theme-friend {
   --bg: #3d1361;
   --text: white;
   --bgButton: #210936;
   --bgProfile: #210936;
   --textNoHover: #d4d4d4;
-  --bgPage: #210936; 
+  --bgPage: #210936;
   --textActive: white;
   --textBW: white;
   --lightRose: #a13df8;
 }
+
 img {
   max-width: 100%;
   border-radius: 8px;
 }
+
 .drag-region {
   -webkit-app-region: drag;
 }
+
 .no-drag {
   -webkit-app-region: no-drag;
 }
 
+input::placeholder {
+  color: var(--placeholder-color, #888) !important;
+  opacity: 0.5;
+  transition: color .2s;
+}
+
+:root {
+  --input-hover: rgba(30, 30, 40, 0.04);
+  --dropdown-hover: rgba(30, 30, 40, 0.07);
+}
+
+html.dark,
+body.dark {
+  --input-hover: rgba(255, 255, 255, 0.03);
+  --dropdown-hover: rgba(255, 255, 255, 0.07);
+}
+
 .custom-radio {
-  appearance: none; /* Убираем стандартный стиль */
-  width: 16px; /* Ширина */
-  height: 16px; /* Высота */
-  border: 2px solid #ccc; /* Цвет рамки */
-  border-radius: 50%; /* Скругление для создания круга */
-  outline: none; /* Убираем контур */
-  cursor: pointer; /* Курсор при наведении */
+  appearance: none;
+  /* Убираем стандартный стиль */
+  width: 16px;
+  /* Ширина */
+  height: 16px;
+  /* Высота */
+  border: 2px solid #ccc;
+  /* Цвет рамки */
+  border-radius: 50%;
+  /* Скругление для создания круга */
+  outline: none;
+  /* Убираем контур */
+  cursor: pointer;
+  /* Курсор при наведении */
 }
 
 .custom-radio:checked {
-  background-color: #b3133b; /* Цвет фона при выборе */
-  border: 2px solid #ff2056; /* Цвет рамки при выборе */
+  background-color: #b3133b;
+  /* Цвет фона при выборе */
+  border: 2px solid #ff2056;
+  /* Цвет рамки при выборе */
 }
 
 .custom-radio:focus {
-  box-shadow: 0 0 0 2px rgba(255, 0, 0, 0.5); /* Эффект при фокусе */
+  box-shadow: 0 0 0 2px rgba(255, 0, 0, 0.5);
+  /* Эффект при фокусе */
 }
 
 @keyframes marquee {
   0% {
     transform: translateX(0%);
   }
+
   10% {
     transform: translateX(0%);
   }
+
   45% {
     transform: translateX(-100%);
   }
+
   55% {
     transform: translateX(-100%);
   }
+
   100% {
     transform: translateX(0%);
   }
@@ -212,8 +260,46 @@ img {
     0% {
       transform: translateX(-100%);
     }
+
     100% {
       transform: translateX(100%);
     }
   }
+}
+
+/* Красивая кастомная прокрутка */
+::-webkit-scrollbar-button {
+  display: none;
+  height: 0;
+  width: 0;
+}
+
+/* Размер скроллбара */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+/* Трек — фон под ползунком */
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Сам ползунок */
+::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.15); /* Вместо синего — белый с прозрачностью */
+  border-radius: 9999px; /* Круглый */
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  transition: background-color 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.35);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: auto; /* Нормальная толщина */
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 }

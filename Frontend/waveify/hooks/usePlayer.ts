@@ -14,6 +14,7 @@ interface PlayerStore {
   reset: () => void;
   setVolume: (volume: number) => void;
   loadVolume: () => void;
+  stop: () => void; 
 }
 
 const usePlayer = create<PlayerStore>((set) => ({

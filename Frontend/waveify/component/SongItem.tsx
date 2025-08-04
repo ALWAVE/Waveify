@@ -6,7 +6,7 @@ import SmartLink from "./SmartLink";
 
 interface SongItemProps {
   data: Song;
-  onPlay: (id: string) => void;
+  onPlay?: (id: string) => void;
 }
 
 const SongItem: React.FC<SongItemProps> = ({ data, onPlay }) => {
@@ -54,7 +54,7 @@ const SongItem: React.FC<SongItemProps> = ({ data, onPlay }) => {
         </SmartLink>
       </div>
 
-      <div onClick={() => onPlay(data.id)} className=" flex flex-col items-start w-full pt-4 gap-y-1">
+      <div onClick={() => onPlay?.(data.id)} className=" flex flex-col items-start w-full pt-4 gap-y-1">
         <p className="font-semibold text-[var(--text)] truncate w-full">{data.title}</p>
         <p className="text-neutral-400 text-sm pb-2 w-full truncate">{data.author}</p>
       </div>
@@ -64,12 +64,12 @@ const SongItem: React.FC<SongItemProps> = ({ data, onPlay }) => {
         <div
           onClick={(e) => {
             e.stopPropagation();
-            onPlay(data.id);
+            onPlay?.(data.id);
           }}
         >
           <PlayButton
             isPlaying={isPlaying}
-            onClick={() => onPlay(data.id)}
+            onClick={() => onPlay?.(data.id)}
             className="p-4 active:scale-85"
           />
         </div>

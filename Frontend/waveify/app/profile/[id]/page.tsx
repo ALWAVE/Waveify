@@ -7,6 +7,7 @@ import SongItem from "@/component/SongItem";
 import { Song } from "@/models/Song";
 import toast from "react-hot-toast";
 import Tooltip from "@/component/Tooltipe";
+import useOnPlay from "@/hooks/useOnPlay";
 
 
 interface UserProfile {
@@ -148,7 +149,7 @@ const Profile = () => {
             <p className="col-span-full text-center text-gray-500">Песен нет</p>
           ) : (
             songs.map((song) => (
-              <SongItem key={song.id} data={song} />
+              <SongItem key={song.id} data={song}  />
             ))
           )}
         </div>
