@@ -65,10 +65,6 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
     [pathname]
   );
 
-  const toggleSearch = () => {
-    setSearchVisible(!isSearchVisible);
-  };
-
   useEffect(() => {
     if (typeof window !== "undefined") {
       setScreenWidth(window.innerWidth);
@@ -89,7 +85,7 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
       } else {
         setHidePremium(false);
       }
-      if (screenWidth < 768) {
+      if (screenWidth < 980) {
         setHideLogo(true);
       } else {
         setHideLogo(false);
@@ -115,14 +111,14 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
             <button
 
               onClick={() => router.back()}
-              className="no-drag rounded-full bg-[var(--bgPage)] flex items-center  hover:bg-rose-500 transition"
+              className="no-drag rounded-full flex items-center active:scale-90 duration-150 active:opacity-70 hover:bg-rose-500 transition"
             >
               <RxCaretLeft className="text-[var(--text)]" size={35} />
             </button>
             <button
 
               onClick={() => router.forward()}
-              className="no-drag rounded-full bg-[var(--bgPage)] flex items-center  hover:bg-rose-500 transition"
+              className="no-drag rounded-full flex items-center active:scale-90 duration-150 active:opacity-70  hover:bg-rose-500 transition"
             >
               <RxCaretRight className="text-[var(--text)]" size={35} />
             </button>
@@ -135,7 +131,7 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
                 <div className="no-drag">
                   <SidebarItem
                     textColorActive="[var(--bg)]"
-                    className={twMerge(`rounded-full hover:scale-103 transition-all duration-100 active:scale-98 hover:opacity-85`)}
+                    className={twMerge(`rounded-full hover:scale-110 transition-all active:scale-98 active:opacity-85 duration-150 `)}
                     positionToolTipe="bottom"
                     {...item}
                   />
@@ -172,10 +168,12 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
             {!hidePremium && (
               <SmartLink
                 href={"/premium"}
-                className="no-drag hidden md:flex font-semibold bg-gradient-to-r from-violet-200 to-pink-200 text-black hover:opacity-100 hover:bg-white hover:scale-102 rounded-full px-4 py-1"
+                className=" no-drag hidden md:flex font-semibold bg-[var(--bgPage)] hover:text-black text-[var(--text)] 
+                ring-1 ring-[var(--text)]/50 hover:bg-gradient-to-r from-violet-200 to-pink-200 
+                hover:opacity-100 hover:bg-white rounded-full px-4 py-1 duration-2000"
               >
                 <h1 className="text-base whitespace-nowrap">
-                  Узнать большe о Premium
+                  Try Premium
                 </h1>
               </SmartLink>
             )}

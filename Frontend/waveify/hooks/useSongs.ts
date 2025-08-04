@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Song } from "@/models/Song"; // если тип есть
+import { Song } from "@/models/Song";
 
 const useSongs = (selectedVibes: string[]) => {
-  const [songs, setSongs] = useState([]);
+  const [songs, setSongs] = useState<Song[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const refresh = () => {
@@ -19,9 +19,12 @@ const useSongs = (selectedVibes: string[]) => {
         if (!res.ok) throw new Error(`Ошибка сервера: ${res.status}`);
         return res.json();
       })
-      .then((data) => {
+      .then((data: Song[]) => {
         // Сортировка: новые сверху
-        const sorted = data.sort((a, b) => new Date(b.createAt).getTime() - new Date(a.createAt).getTime());
+        const sorted = data.sort(
+          (a, b) =>
+            new Date(b.createAt).getTime() - new Date(a.createAt).getTime()
+        );
         setSongs(sorted);
       })
       .catch((err) => {
@@ -33,6 +36,5 @@ const useSongs = (selectedVibes: string[]) => {
 
   return { songs, isLoading, refresh };
 };
-
 
 export default useSongs;

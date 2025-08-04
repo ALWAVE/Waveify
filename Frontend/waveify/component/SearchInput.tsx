@@ -1,12 +1,12 @@
+"use client";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BiSearch, BiChevronDown } from "react-icons/bi";
 import { AiOutlineClose, AiOutlineFileImage } from "react-icons/ai";
 import useSongs from "@/hooks/useSongs";
 import { Song } from "@/models/Song";
-import Tooltip from "./Tooltipe";
+import { motion, AnimatePresence } from "framer-motion";
 
-// --- Настройки фильтров ---
 const filterOptions = [
   { label: "All", value: "all" },
   { label: "Track", value: "track" },
@@ -16,7 +16,14 @@ const filterOptions = [
   { label: "Quietly", value: "quietly" },
   { label: "Sad", value: "sad" },
 ] as const;
-
+const placeholders = [
+  "Что включим?",
+  "Что хочешь включить?",
+  "Музыка на сегодня?",
+  "Найти любимый трек...",
+  "Что послушаем?",
+  "Впиши в меня что нибудь...",
+];
 type FilterType = typeof filterOptions[number]["value"];
 
 type SearchHistoryItem =
@@ -24,53 +31,48 @@ type SearchHistoryItem =
   | { type: "text"; query: string };
 
 function getSongText(song: Song): string {
-  return [
-    song.title,
-    song.author,
-    song.description,
-    song.type,
-    song.vibe,
-  ]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
+  return [song.title, song.author, song.vibe].filter(Boolean).join(" ").toLowerCase();
 }
 
-interface SearchInputProps {
-  className?: string;
-  inputClassName?: string;
-  style?: React.CSSProperties;
-}
+const fadeVariants = {
+  hidden: { opacity: 0, pointerEvents: "none" as const },
+  visible: { opacity: 1, pointerEvents: "auto" as const },
+  exit: { opacity: 0, pointerEvents: "none" as const },
+};
 
-const SearchInput: React.FC<SearchInputProps> = ({
-  className = "",
-  inputClassName = "",
-  style,
-}) => {
+const SearchInput = () => {
+  const [randomPlaceholder, setRandomPlaceholder] = useState(placeholders[0]);
   const [searchValue, setSearchValue] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [selectedFilter, setSelectedFilter] = useState<FilterType>("all");
   const [filterOpen, setFilterOpen] = useState(false);
-
+  const [selectedFilter, setSelectedFilter] = useState<FilterType>("all");
+  const [themeKey, setThemeKey] = useState(0);
+  const [layoutLetter, setLayoutLetter] = useState<"K" | "Л">("K");
   const wrapperRef = useRef<HTMLDivElement>(null);
   const filterRef = useRef<HTMLDivElement>(null);
-
   const { songs, refresh, isLoading } = useSongs([]);
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    refresh();
+    const update = () => setThemeKey(k => k + 1);
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', update);
+    return () =>
+      window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', update);
   }, []);
 
+  useEffect(() => { refresh(); }, []);
   const [searchHistory, setSearchHistory] = useState<SearchHistoryItem[]>(() => {
     if (typeof window !== "undefined") {
       return JSON.parse(localStorage.getItem("searchHistory") || "[]");
     }
     return [];
   });
-
+  useEffect(() => {
+    const idx = Math.floor(Math.random() * placeholders.length);
+    setRandomPlaceholder(placeholders[idx]);
+  }, []);
   useEffect(() => {
     if (!searchValue) return;
     const timeout = setTimeout(() => {
@@ -83,25 +85,23 @@ const SearchInput: React.FC<SearchInputProps> = ({
         localStorage.setItem("searchHistory", JSON.stringify(arr.slice(0, 7)));
         return arr.slice(0, 7);
       });
-    }, 1500);
+    }, 900);
     return () => clearTimeout(timeout);
   }, [searchValue]);
 
   const filterSong = (song: Song): boolean => {
     if (selectedFilter === "all") return true;
-    if (selectedFilter === "track" || selectedFilter === "beat") {
-      return (song.type || "").toLowerCase() === selectedFilter;
-    }
     return (song.vibe || "").toLowerCase() === selectedFilter;
   };
 
   const suggestions =
     searchValue.length > 0
       ? songs
-          .filter((song) => filterSong(song) && getSongText(song).includes(searchValue.toLowerCase()))
-          .slice(0, 8)
+        .filter((song) => filterSong(song) && getSongText(song).includes(searchValue.toLowerCase()))
+        .slice(0, 8)
       : [];
 
+  // Клик вне — закрыть
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -119,16 +119,49 @@ const SearchInput: React.FC<SearchInputProps> = ({
   }, []);
 
   useEffect(() => {
-    setShowDropdown(isFocused || !!searchValue);
-  }, [isFocused, searchValue]);
+    const handler = (e: KeyboardEvent) => {
+      const isK = e.code === "KeyK";
+      const isKeyL = e.key && (e.key.toLowerCase() === "k" || e.key.toLowerCase() === "л");
+      if ((e.ctrlKey || e.metaKey) && (isK || isKeyL)) {
+        // Меняем подсказку:
+        if (e.key && (e.key.toLowerCase() === "л")) setLayoutLetter("Л");
+        else setLayoutLetter("K");
+        // Не открываем если внутри input:
+        if (
+          document.activeElement &&
+          (document.activeElement as HTMLElement).tagName === "INPUT"
+        ) return;
+        e.preventDefault();
+        setFilterOpen(false);
+        setTimeout(() => {
+          inputRef.current?.focus();
+          setIsFocused(true);
+          setShowDropdown(true);
+        }, 20);
+      }
+    };
+    window.addEventListener("keydown", handler, { capture: true });
+    return () => window.removeEventListener("keydown", handler, { capture: true });
+  }, []);
+  const openSearchDropdown = () => {
+    setShowDropdown(true);
+    setFilterOpen(false);
+    setIsFocused(true);
+  };
+  const openFilterDropdown = () => {
+    setFilterOpen(true);
+    setShowDropdown(false);
+    setIsFocused(false);
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
       if (!searchValue.trim()) return;
       router.push(`/explore?query=${encodeURIComponent(searchValue.trim())}&filter=${selectedFilter}`);
-      inputRef.current?.blur();
       setShowDropdown(false);
+      setIsFocused(false);
+      inputRef.current?.blur();
     }
   };
 
@@ -171,13 +204,15 @@ const SearchInput: React.FC<SearchInputProps> = ({
       router.push(`/explore?query=${encodeURIComponent(item.query)}&filter=${selectedFilter}`);
     }
   };
+
   const handleSearch = () => {
     if (!searchValue.trim()) return;
     router.push(`/explore?query=${encodeURIComponent(searchValue.trim())}&filter=${selectedFilter}`);
-    inputRef.current?.blur();
     setShowDropdown(false);
     setIsFocused(false);
+    inputRef.current?.blur();
   };
+
   const removeHistoryItem = (item: SearchHistoryItem) => {
     setSearchHistory((prev) => {
       let arr: SearchHistoryItem[];
@@ -196,194 +231,312 @@ const SearchInput: React.FC<SearchInputProps> = ({
     localStorage.removeItem("searchHistory");
   };
 
-  const imageStyle =
-    "w-10 h-10 object-cover rounded-lg bg-neutral-800 border border-white/10 flex-shrink-0";
+  const [showShortcut, setShowShortcut] = useState(false);
+
+  // Основной фон
+  const baseBg = { background: "var(--bgPage, #fff)", color: "var(--text, #15151a)" };
+  const borderCol = { borderColor: "rgba(0,0,0,0.06)" };
 
   return (
-    <div
-      className={`no-drag relative w-full max-w-xl mx-auto ${className}`}
-      style={style}
-      ref={wrapperRef}
-    >
-      {/* SEARCH BAR */}
-      <div
-        className={`no-drag flex items-center bg-neutral-900/90 rounded-full px-5 py-2 shadow-xl ring-2 ${
-          isFocused ? "ring-rose-500" : "ring-white/10"
-        } transition-all duration-200`}
+    <div className={`no-drag relative w-full max-w-lg mx-auto`} ref={wrapperRef}>
+      <motion.div
+        className={`
+          flex items-center rounded-full px-4 py-2 shadow border transition-colors duration-200 group
+          bg-white
+        `}
+        style={{
+          ...baseBg,
+          ...borderCol,
+          minHeight: 48,
+          position: "relative",
+        }}
+        animate={isFocused || showShortcut ? { boxShadow: "0 4px 18px rgba(230,35,77,0.10)", borderColor: "rgba(255,255,255)" } : {}}
+        whileHover={{
+          boxShadow: "0 2px 12px rgba(255,255,255,0.08)",
+          borderColor: "rgba(255,255,255,0.25)",
+        }}
+        transition={{ duration: 0.19 }}
+        onMouseEnter={() => setShowShortcut(true)}
+        onMouseLeave={() => setShowShortcut(false)}
       >
-        <button  onClick={handleSearch} className="cursor-pointer hover:scale-111 duration-150 active:scale-90">
-          
-           <BiSearch size={22} className="text-neutral-400 mr-3" />
+        <button
+          onClick={handleSearch}
+          className="cursor-pointer hover:bg-black/10 rounded-full p-1 transition-colors mr-1"
+          tabIndex={-1}
+          style={{ color: "var(--text, #232323)" }}
+        >
+          <BiSearch size={20} />
         </button>
-      
+
         <input
+          key={themeKey}
           ref={inputRef}
           type="text"
-          className={`bg-transparent flex-1 outline-none text-white placeholder:text-neutral-400 text-lg ${inputClassName}`}
-          placeholder="Поиск трека, бита или вайба…"
+          className={`
+            bg-transparent flex-1 outline-none text-base transition-colors duration-150 rounded-full px-2
+          `}
+          style={{
+            color: "var(--text)",
+            '--placeholder-color': 'var(--text, #888)',
+            minWidth: 0,   
+            paddingTop: 2,
+            paddingBottom: 2,
+          } as any}
+          placeholder={randomPlaceholder}
           value={searchValue}
           onChange={(e) => setSearchValue(e.target.value)}
-          onFocus={() => setIsFocused(true)}
+          onFocus={openSearchDropdown}
           onKeyDown={handleKeyDown}
         />
 
-        {/* DROPDOWN FILTER RIGHT */}
-        <div className="relative" ref={filterRef}>
+        {/* Ctrl+K всегда зарезервированное место, плавно появляется */}
+        <div
+          className={`
+            ml-2 hidden sm:flex items-center rounded bg-black/5 px-2 py-1 border text-xs font-mono font-medium gap-0.5 transition-opacity duration-200
+            select-none
+          `}
+          style={{
+            color: "var(--text, #15151a)",
+            borderColor: "rgba(0,0,0,0.08)",
+            minWidth: 60, // <-- всегда есть место, размер SearchInput не меняется!
+            opacity: showShortcut || isFocused ? 1 : 0,
+            pointerEvents: "none",
+            height: 28, // Фиксированная высота для визуального выравнивания
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            transition: "opacity 0.18s"
+          }}
+        >
+          <kbd style={{ opacity: 0.7 }}>Ctrl</kbd>
+          <span style={{ opacity: 0.5 }}>+</span>
+          <kbd style={{ opacity: 0.7 }}>{layoutLetter}</kbd>
+        </div>
+
+        <div className="relative ml-2 z-20" ref={filterRef}>
           <button
             type="button"
-            onClick={() => setFilterOpen((open) => !open)}
-            className="flex items-center gap-1 bg-neutral-800 hover:bg-neutral-700 transition px-3 py-1.5 rounded-xl text-white font-semibold text-sm ml-2"
+            onClick={() => (filterOpen ? setFilterOpen(false) : openFilterDropdown())}
+            className={`
+              flex items-center gap-1
+              hover:bg-black/10
+              transition px-3 py-1 rounded-full font-semibold text-sm border focus:outline-none
+            `}
+            tabIndex={0}
+            style={{
+              background: "var(--bg, #f7f7f7)",
+              color: "var(--text)",
+              borderColor: "rgba(0,0,0,0.08)",
+              fontWeight: 500,
+            }}
           >
             <span className="capitalize">
               {filterOptions.find(o => o.value === selectedFilter)?.label || "All"}
             </span>
-            <BiChevronDown className={`text-xl transition-transform ${filterOpen ? "rotate-180" : ""}`} />
+            <BiChevronDown className={`text-lg transition-transform ${filterOpen ? "rotate-180" : ""}`} />
           </button>
-          {filterOpen && (
-            <div className="absolute right-0 mt-1 w-36 bg-neutral-900 border border-white/10 rounded-lg shadow-lg z-51 overflow-hidden animate-fade-in">
-              {filterOptions.map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => {
-                    setSelectedFilter(option.value);
-                    setFilterOpen(false);
-                  }}
-                  className={`block w-full text-left px-4 py-2 text-sm transition
-                    ${selectedFilter === option.value
-                      ? "bg-rose-500 text-white"
-                      : "text-neutral-300 hover:bg-neutral-800"}
-                  `}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          )}
+          <AnimatePresence>
+            {filterOpen && (
+              <motion.div
+                key="filter-dropdown"
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                variants={fadeVariants}
+                transition={{ duration: 0.18 }}
+                className="absolute right-0 mt-2 w-36 rounded-xl shadow-xl z-40 overflow-hidden border"
+                style={{
+                  background: "var(--bg, #f7f7f7)",
+                  color: "var(--text)",
+                  borderColor: "rgba(0,0,0,0.1)"
+                }}
+              >
+                {filterOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => {
+                      setSelectedFilter(option.value);
+                      setFilterOpen(false);
+                      setShowDropdown(false);
+                    }}
+                    className={`block w-full text-left px-4 py-2 text-sm transition rounded-lg hover:bg-[var(--bgPage)]`}
+                    style={{
+                      background: selectedFilter === option.value ? "rgba(230, 35, 77, 0.93)" : "transparent",
+                      color: selectedFilter === option.value ? "#fff" : "var(--text)",
+                      fontWeight: selectedFilter === option.value ? 700 : 400
+                    }}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {searchValue && (
           <button
-            className="ml-2 text-neutral-400 hover:text-white transition"
+            className="ml-2 transition rounded-full p-1"
             onClick={() => setSearchValue("")}
             tabIndex={-1}
+            aria-label="Clear search"
+            style={{ color: "var(--text, #15151a)" }}
           >
             <AiOutlineClose size={18} />
           </button>
         )}
-      </div>
+      </motion.div>
 
-      {/* DROPDOWN */}
-      {showDropdown && (
-        <div className="absolute left-0 right-0 mt-2 z-50">
-          {searchValue && (
-            <div className="bg-neutral-900/95 rounded-xl shadow-2xl overflow-y-auto border border-white/10 animate-fade-in max-h-80">
-              {isLoading ? (
-                <div className="p-4 text-neutral-400 text-center text-sm">
-                  Загрузка песен...
-                </div>
-              ) : suggestions.length > 0 ? (
+      {/* SEARCH DROPDOWN */}
+      <AnimatePresence>
+        {showDropdown && !filterOpen && (
+          <motion.div
+            key="search-dropdown"
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            variants={fadeVariants}
+            transition={{ duration: 0.19 }}
+            className="absolute left-0 right-0 mt-2 z-10 "
+          >
+            {searchValue ? (
+              <div
+                className="rounded-2xl shadow-2xl overflow-y-auto max-h-80 backdrop-blur-[2px] p-1 border"
+                style={{
+                  ...baseBg,
+                  ...borderCol,
+                }}
+              >
+                {isLoading ? (
+                  <div className="p-4 text-center text-base" style={{ color: "var(--text)", opacity: 0.7 }}>
+                    Загрузка песен...
+                  </div>
+                ) : suggestions.length > 0 ? (
+                  <ul>
+                    {suggestions.map((song: Song) => (
+                      <li
+                        key={song.id}
+                        className="flex items-center gap-4 px-3 py-2 cursor-pointer rounded-xl transition-colors"
+                        style={{
+                          color: "var(--text)",
+                          fontWeight: 500,
+                        }}
+                        onMouseDown={() => handleSuggestionClick(song)}
+                        onMouseEnter={e => (e.currentTarget.style.background = "rgba(40,40,60,0.12)")}
+                        onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                      >
+                        {song.imagePath ? (
+                          <img
+                            src={song.imagePath}
+                            alt={song.title}
+                            className="w-9 h-9 object-cover rounded-lg flex-shrink-0"
+                            loading="lazy"
+                            width={36}
+                            height={36}
+                            style={{ background: "#f0f0f0" }}
+                          />
+                        ) : (
+                          <div className="w-9 h-9 object-cover rounded-lg flex-shrink-0 flex items-center justify-center" style={{ background: "#f0f0f0", color: "#aaa" }}>
+                            <AiOutlineFileImage size={20} />
+                          </div>
+                        )}
+                        <div>
+                          <div style={{ fontWeight: 600, color: "var(--text)" }}>{song.title}</div>
+                          <div style={{ fontSize: 13, opacity: 0.65 }}>{song.author} • {song.vibe}</div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div className="p-4 text-base" style={{ color: "var(--text)", opacity: 0.6 }}>
+                    Нет совпадений
+                  </div>
+                )}
+              </div>
+            ) : searchHistory.length > 0 && (
+              <div
+                className="rounded-2xl shadow-2xl overflow-y-auto max-h-72 backdrop-blur-[2px] p-1 border"
+                style={{
+                  ...baseBg,
+                  ...borderCol,
+                }}
+              >
+                <div className="px-4 py-2 text-xs" style={{ opacity: 0.7 }}>История поиска</div>
                 <ul>
-                  {suggestions.map((song: Song) => (
+                  {searchHistory.map((item, i) => (
                     <li
-                      key={song.id}
-                      className="flex items-center gap-4 px-4 py-3 cursor-pointer hover:bg-rose-500/80 transition-all group"
-                      onMouseDown={() => handleSuggestionClick(song)}
+                      key={i + (item.type === "song" ? item.id : item.query)}
+                      className="group flex items-center gap-3 px-3 py-2 rounded-xl transition-colors cursor-pointer"
+                      style={{
+                        color: "var(--text)",
+                        fontWeight: 500,
+                      }}
+                      onMouseEnter={e => (e.currentTarget.style.background = "rgba(40,40,60,0.12)")}
+                      onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
                     >
-                      {song.imagePath ? (
-                        <img
-                          src={song.imagePath}
-                          alt={song.title}
-                          className={imageStyle}
-                          loading="lazy"
-                          width={40}
-                          height={40}
-                        />
+                      {item.type === "song" ? (
+                        <>
+                          {item.imagePath ? (
+                            <img
+                              src={item.imagePath}
+                              alt={item.title}
+                              className="w-9 h-9 object-cover rounded-lg flex-shrink-0"
+                              width={36}
+                              height={36}
+                              style={{ background: "#f0f0f0" }}
+                            />
+                          ) : (
+                            <div className="w-9 h-9 object-cover rounded-lg flex-shrink-0 flex items-center justify-center" style={{ background: "#f0f0f0", color: "#aaa" }}>
+                              <AiOutlineFileImage size={18} />
+                            </div>
+                          )}
+                          <div className="flex-1" onMouseDown={() => handleHistoryClick(item)}>
+                            <div style={{ fontWeight: 600, color: "var(--text)" }}>{item.title}</div>
+                            <div style={{ fontSize: 13, opacity: 0.65 }}>{item.author}</div>
+                          </div>
+                        </>
                       ) : (
-                        <div className={imageStyle + " flex items-center justify-center text-neutral-500"}>
-                          <AiOutlineFileImage size={22} />
-                        </div>
+                        <>
+                          <BiSearch style={{ opacity: 0.65 }} size={16} />
+                          <span className="flex-1" onMouseDown={() => handleHistoryClick(item)}>
+                            {item.query}
+                          </span>
+                        </>
                       )}
-                      <div>
-                        <div className="font-semibold text-white group-hover:text-white">
-                          {song.title}
-                        </div>
-                        <div className="text-xs text-neutral-400">{song.author} • {song.vibe}</div>
-                        <div className="text-[10px] text-neutral-500 mt-0.5 flex gap-1">
-                          {song.type && <span>{song.type}</span>}
-                        </div>
-                      </div>
+                      <button
+                        className="ml-2 opacity-60 group-hover:opacity-100 hover:text-red-400 transition rounded-full p-1"
+                        title="Удалить из истории"
+                        onMouseDown={(e) => {
+                          e.stopPropagation();
+                          removeHistoryItem(item);
+                        }}
+                        style={{ color: "var(--text)" }}
+                      >
+                        <AiOutlineClose size={15} />
+                      </button>
                     </li>
                   ))}
                 </ul>
-              ) : (
-                <div className="p-4 text-neutral-500 text-sm">
-                  Нет совпадений
-                </div>
-              )}
-            </div>
-          )}
-          {!searchValue && searchHistory.length > 0 && (
-            <div className="bg-neutral-900/95 rounded-xl shadow-2xl overflow-y-auto border border-white/10 animate-fade-in max-h-72">
-              <div className="px-4 py-2 text-xs text-neutral-400">
-                История поиска
-              </div>
-              <ul>
-                {searchHistory.map((item, i) => (
-                  <li
-                    key={i + (item.type === "song" ? item.id : item.query)}
-                    className="group flex items-center gap-3 px-4 py-2 hover:bg-rose-500/70 transition-all cursor-pointer"
+                <div className="flex justify-center p-2">
+                  <button
+                    className="flex items-center gap-2 px-4 py-1.5 rounded-full border text-sm font-semibold shadow active:scale-95 transition hover:scale-102 duration-150"
+                    style={{
+                      ...baseBg,
+                      ...borderCol,
+                      fontWeight: 500
+                    }}
+                    onClick={clearSearchHistory}
                   >
-                    {item.type === "song" ? (
-                      <>
-                        {item.imagePath ? (
-                          <img
-                            src={item.imagePath}
-                            alt={item.title}
-                            className={imageStyle}
-                            width={40}
-                            height={40}
-                          />
-                        ) : (
-                          <div className={imageStyle + " flex items-center justify-center text-neutral-500"}>
-                            <AiOutlineFileImage size={22} />
-                          </div>
-                        )}
-                        <div className="flex-1" onMouseDown={() => handleHistoryClick(item)}>
-                          <div className="font-semibold text-white">{item.title}</div>
-                          <div className="text-xs text-neutral-400">{item.author}</div>
-                        </div>
-                      </>
-                    ) : (
-                      <><BiSearch className="text-neutral-400" size={18} />
-                        <span className="flex-1" onMouseDown={() => handleHistoryClick(item)}>
-                          {item.query}
-                        </span>
-                      </>
-                    )}
-                    <button
-                      className="ml-2 opacity-60 group-hover:opacity-100 hover:text-red-400 transition"
-                      title="Удалить из истории"
-                      onMouseDown={(e) => {
-                        e.stopPropagation();
-                        removeHistoryItem(item);
-                      }}
-                    >
-                      <AiOutlineClose size={16} />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-              <button
-                className="w-full text-xs text-neutral-400 hover:text-white p-2 border-t border-white/5"
-                onClick={clearSearchHistory}
-              >
-                Очистить историю
-              </button>
-            </div>
-          )}
-        </div>
-      )}
+                    <AiOutlineClose size={14} style={{ opacity: 0.7 }} />
+                    Очистить историю
+                  </button>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

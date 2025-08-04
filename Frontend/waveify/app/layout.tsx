@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Figtree } from "next/font/google"
+import { Inter } from "next/font/google"; 
+// figtree
 import "./globals.css";
 import Sidebar from "@/component/Sidebar";
 import ModalProvider from "@/providers/ModalProvider";
@@ -13,7 +14,7 @@ import CookieConsent from "@/component/CookieConsent";
 import DisableContextMenu from "@/component/DisableContextMenu";
 
 
-const figtree = Figtree({ subsets: ["latin"] })
+const figtree = Inter({ subsets: ["latin"] })
 
 
 export const metadata: Metadata = {
@@ -52,7 +53,7 @@ export default function RootLayout({
             <TitleBar />
             <div className="flex flex-1 overflow-hidden">
               <Sidebar />
-              <main className="flex-1 bg-[var(--bg)] h-[calc(100%-80px)]   overflow-y-auto pr-2 pl-2 relative z-0">
+              <main className="flex-1 bg-[var(--bg)] h-[calc(100%-80px)] scroll-container overflow-y-auto pr-2 pl-2 relative z-0">
                 {children}
               </main>
             </div>
