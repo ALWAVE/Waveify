@@ -69,12 +69,12 @@
 }
 
 .theme-agressive {
-  --bg: #660909;
+  --bg: #0d0d0d;
   --text: white;
-  --bgButton: #490505;
-  --bgProfile: #490505;
+  --bgButton: #121212;
+  --bgProfile: #121212;
   --textNoHover: #d4d4d4;
-  --bgPage: #490505;
+  --bgPage: #121212;
   --textActive: white;
   --textBW: black;
   --lightRose: white;
@@ -302,4 +302,23 @@ body.dark {
 * {
   scrollbar-width: auto; /* Нормальная толщина */
   scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+
+@keyframes toastIn {
+  0% { transform: translateY(100%); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes toastOut {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(100%); opacity: 0; }
+}
+
+.animate-toastIn {
+  animation: toastIn 0.3s ease-out forwards;
+}
+
+.animate-toastOut {
+  animation: toastOut 0.25s ease-in forwards;
 }

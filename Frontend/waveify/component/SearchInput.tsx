@@ -6,6 +6,7 @@ import { AiOutlineClose, AiOutlineFileImage } from "react-icons/ai";
 import useSongs from "@/hooks/useSongs";
 import { Song } from "@/models/Song";
 import { motion, AnimatePresence } from "framer-motion";
+import { twMerge } from "tailwind-merge";
 
 const filterOptions = [
   { label: "All", value: "all" },
@@ -19,7 +20,7 @@ const filterOptions = [
 const placeholders = [
   "Что включим?",
   "Что хочешь включить?",
-  "Музыка на сегодня?",
+  "Что  сегодня?",
   "Найти любимый трек...",
   "Что послушаем?",
   "Впиши в меня что нибудь...",
@@ -39,8 +40,10 @@ const fadeVariants = {
   visible: { opacity: 1, pointerEvents: "auto" as const },
   exit: { opacity: 0, pointerEvents: "none" as const },
 };
-
-const SearchInput = () => {
+interface SearchInputProps {
+  className?: string;
+}
+const SearchInput: React.FC<SearchInputProps> = ({ className }) => {
   const [randomPlaceholder, setRandomPlaceholder] = useState(placeholders[0]);
   const [searchValue, setSearchValue] = useState("");
   const [isFocused, setIsFocused] = useState(false);
@@ -238,7 +241,8 @@ const SearchInput = () => {
   const borderCol = { borderColor: "rgba(0,0,0,0.06)" };
 
   return (
-    <div className={`no-drag relative w-full max-w-lg mx-auto`} ref={wrapperRef}>
+    <div  className={twMerge("no-drag", className)}
+     ref={wrapperRef}>
       <motion.div
         className={`
           flex items-center rounded-full px-4 py-2 shadow border transition-colors duration-200 group
@@ -247,7 +251,7 @@ const SearchInput = () => {
         style={{
           ...baseBg,
           ...borderCol,
-          minHeight: 48,
+          minHeight: 38,
           position: "relative",
         }}
         animate={isFocused || showShortcut ? { boxShadow: "0 4px 18px rgba(230,35,77,0.10)", borderColor: "rgba(255,255,255)" } : {}}
@@ -298,7 +302,7 @@ const SearchInput = () => {
           style={{
             color: "var(--text, #15151a)",
             borderColor: "rgba(0,0,0,0.08)",
-            minWidth: 60, // <-- всегда есть место, размер SearchInput не меняется!
+     
             opacity: showShortcut || isFocused ? 1 : 0,
             pointerEvents: "none",
             height: 28, // Фиксированная высота для визуального выравнивания

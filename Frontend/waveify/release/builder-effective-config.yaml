@@ -1,0 +1,18 @@
+directories:
+  output: release
+  buildResources: build
+appId: com.waveify.player
+productName: Waveify
+executableName: Waveify
+files:
+  - filter:
+      - dist-electron/**/*
+      - public/**/*
+win:
+  target: nsis
+  icon: public/logo_new.ico
+extraMetadata:
+  name: Waveify
+  productName: Waveify
+  description: Вейфи Музыка
+electronVersion: 35.0.2

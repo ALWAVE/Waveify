@@ -121,7 +121,14 @@ const TrackTable: React.FC<TrackTableProps> = ({ tracks = [], updateLikedSongs, 
 
                   {editMode ? (
                     <td className="text-right pr-4 rounded-r-lg flex items-center justify-end gap-2">
-                      <SongLikeButton songId={track.id} toolTipePosition="left" updateLikedSongs={updateLikedSongs} />
+                      <SongLikeButton
+                        songId={track.id}
+                        title={track.title}
+                        author={track.author}
+                        imagePath={track.imagePath}
+                        toolTipePosition="left"
+                        // updateLikedSongs={updateLikedSongs}
+                      />
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -135,7 +142,14 @@ const TrackTable: React.FC<TrackTableProps> = ({ tracks = [], updateLikedSongs, 
                     </td>
                   ) : (
                     <td className="text-right pr-4 rounded-r-lg">
-                      <SongLikeButton songId={track.id} toolTipePosition="left" updateLikedSongs={updateLikedSongs} />
+                      <SongLikeButton
+                        songId={track.id}
+                        title={track.title}
+                        author={track.author}
+                        imagePath={track.imagePath}
+                        toolTipePosition="left"
+                        // updateLikedSongs={updateLikedSongs}
+                      />
                     </td>
                   )}
                 </tr>

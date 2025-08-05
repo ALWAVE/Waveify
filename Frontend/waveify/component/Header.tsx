@@ -23,6 +23,7 @@ import Tooltip from "./Tooltipe";
 import { TbPointFilled } from "react-icons/tb";
 import SearchInput from "./SearchInput";
 import { BiSearch, BiSolidSearch } from "react-icons/bi";
+import MainButton from "./MainButton";
 interface HeaderProps {
   children?: React.ReactNode;
   className?: string;
@@ -36,13 +37,13 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
   const router = useRouter();
   const { user, logout } = useAuth();
 
-  const [isSearchVisible, setSearchVisible] = useState(false);
   const [hidePremium, setHidePremium] = useState(false);
   const [hideLogo, setHideLogo] = useState(false);
   const [screenWidth, setScreenWidth] = useState(0); // ✅ Без window на старте
   const [isAuthModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "register">("login");
-
+  const [historyStack, setHistoryStack] = useState([pathname]); // массив путей
+  const [currentIndex, setCurrentIndex] = useState(0);
   const route = useMemo(
     () => [
       {
@@ -64,7 +65,29 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
     ],
     [pathname]
   );
+  useEffect(() => {
+    // если мы перешли на новый путь не через back/forward
+    if (historyStack[currentIndex] !== pathname) {
+      const newStack = historyStack.slice(0, currentIndex + 1);
+      newStack.push(pathname);
+      setHistoryStack(newStack);
+      setCurrentIndex(newStack.length - 1);
+    }
+  }, [pathname]);
 
+  const handleBack = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex((prev) => prev - 1);
+      router.push(historyStack[currentIndex - 1]);
+    }
+  };
+
+  const handleForward = () => {
+    if (currentIndex < historyStack.length - 1) {
+      setCurrentIndex((prev) => prev + 1);
+      router.push(historyStack[currentIndex + 1]);
+    }
+  };
   useEffect(() => {
     if (typeof window !== "undefined") {
       setScreenWidth(window.innerWidth);
@@ -74,7 +97,8 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
       return () => window.removeEventListener("resize", handleResize);
     }
   }, []);
-
+  const canGoBack = currentIndex > 0;
+  const canGoForward = currentIndex < historyStack.length - 1;
   // Проверка подписки и ширины экрана
   useEffect(() => {
     if (user?.subscription) {
@@ -96,7 +120,7 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
   return (
     <div>
       <div
-        className="drag-region  fixed top-0 left-0 w-full bg-[var(--bg)] p-3 flex items-center select-none relative"
+        className="drag-region fixed top-0 left-0 w-full bg-[var(--bg)] p-3 flex items-center select-none relative"
 
       >
         {!hideLogo && <TitleBarLogo />}
@@ -109,16 +133,19 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
 
           <div className="hidden md:flex items-left">
             <button
-
-              onClick={() => router.back()}
-              className="no-drag rounded-full flex items-center active:scale-90 duration-150 active:opacity-70 hover:bg-rose-500 transition"
+              onClick={handleBack}
+              disabled={!canGoBack}
+              className={`no-drag rounded-full flex items-center duration-150 transition 
+              ${canGoBack ? "hover:bg-rose-500 active:scale-90 active:opacity-70" : "cursor-not-allowed opacity-50"}`}
             >
               <RxCaretLeft className="text-[var(--text)]" size={35} />
             </button>
-            <button
 
-              onClick={() => router.forward()}
-              className="no-drag rounded-full flex items-center active:scale-90 duration-150 active:opacity-70  hover:bg-rose-500 transition"
+            <button
+              onClick={handleForward}
+              disabled={!canGoForward}
+              className={`no-drag rounded-full flex items-center duration-150 transition 
+          ${canGoForward ? "hover:bg-rose-500 active:scale-90 active:opacity-70" : "cursor-not-allowed opacity-50"}`}
             >
               <RxCaretRight className="text-[var(--text)]" size={35} />
             </button>
@@ -129,7 +156,7 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
             {route.map((item) => (
               <div key={item.label} className="drag-region">
                 <div className="no-drag">
-                  <SidebarItem
+                  <MainButton
                     textColorActive="[var(--bg)]"
                     className={twMerge(`rounded-full hover:scale-110 transition-all active:scale-98 active:opacity-85 duration-150 `)}
                     positionToolTipe="bottom"
@@ -141,7 +168,7 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
             ))}
 
             {screenWidth < 768 && (
-              <SidebarItem
+              <MainButton
                 icon={<BiSearch size={26} />}
                 iconActive={<BiSolidSearch size={26} />}
                 label="Search"

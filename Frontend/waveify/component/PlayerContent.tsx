@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import useSound from "use-sound";
 import { BsPauseFill, BsPlayFill } from "react-icons/bs";
+import { TbPlayerPlayFilled } from "react-icons/tb";
 import { FaBackwardStep, FaForwardStep } from "react-icons/fa6";
-
 import { HiSpeakerWave, HiSpeakerXMark } from "react-icons/hi2";
 import { RxSize } from "react-icons/rx";
 import * as RadixSlider from "@radix-ui/react-slider";
@@ -45,29 +45,30 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl, favorites,
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const volume = player.volume;
 
-  const Icon = isPlaying ? BsPauseFill : BsPlayFill;
+  const Icon = isPlaying ? BsPauseFill : TbPlayerPlayFilled;
+  const iconSize = isPlaying ? 26 : 22;
 
   const VolumeIcon = volume === 0 ? HiSpeakerXMark : HiSpeakerWave;
 
   useEffect(() => {
     const highQuality = localStorage.getItem("toggleHighQuality");
-    if(highQuality != null){
+    if (highQuality != null) {
       setIsChecked(JSON.parse(highQuality));
     }
-  },[]);
+  }, []);
 
   const handleHighQuality = () => {
-  const newCheckedHighQuality = !isChecked;
-  setIsChecked(newCheckedHighQuality);
-  localStorage.setItem("toggleHighQuality", JSON.stringify(newCheckedHighQuality));
-  
-  if (newCheckedHighQuality) {
-    toast.success("High Quality On");
-    setIsOpen(true); // Открываем модалку
-  } else {
-    toast.error("High Quality Off");
-  }
-};
+    const newCheckedHighQuality = !isChecked;
+    setIsChecked(newCheckedHighQuality);
+    localStorage.setItem("toggleHighQuality", JSON.stringify(newCheckedHighQuality));
+
+    if (newCheckedHighQuality) {
+      toast.success("High Quality On");
+      setIsOpen(true); // Открываем модалку
+    } else {
+      toast.error("High Quality Off");
+    }
+  };
 
   const [play, { pause, sound }] = useSound(songUrl, {
     volume,
@@ -208,13 +209,20 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl, favorites,
       className={twMerge(`grid bg-[var(--bg)]  grid-cols-2 md:grid-cols-3 h-full items-center px-2  `, player.activeId && "h-[calc(100%-80px)]")}>
       {/* Left: Song info */}
 
-    <div className="flex justify-start items-center min-w-0 gap-2">
+      <div className="flex justify-start items-center min-w-0 gap-2">
         <div className="min-w-0 max-w-[60%]">
           <Link href={`/song/${song.id}`} passHref>
             <MediaItem data={song} />
           </Link>
         </div>
-        <SongLikeButton songId={song?.id} toolTipePosition="top" />
+        <SongLikeButton
+          songId={song?.id}
+          title={song?.title}
+          author={song?.author}
+          imagePath={song?.imagePath}
+          toolTipePosition="top"
+        />
+
       </div>
 
 
@@ -234,14 +242,14 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl, favorites,
             className="transition-all duration-200 ease-in-out active:scale-95 hover:scale-109 
             active:opacity-80 flex items-center justify-center h-9 w-9 rounded-full bg-[var(--lightRose)] p-1 cursor-pointer"
           >
-            <Icon size={26} className="text-[var(--textBW)] " />
+            <Icon size={iconSize} className="text-[var(--textBW)]" />
           </div>
           <FaForwardStep
             onClick={handleNext}
             size={22}
             className="text-neutral-400 hover:text-[var(--text)] cursor-pointer"
           />
-          
+
         </div>
 
         <div className="flex items-center gap-2 w-full mb-2">
@@ -278,15 +286,15 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl, favorites,
 
       {/* Right: Volume */}
       <div className="hidden md:flex justify-end w-full pr-2">
-      <button
-        onClick={handleHighQuality}
-        className={twMerge(
-          "ml-11 cursor-pointer text-xs rounded-lg px-2 py-1 text-[var(--text)] transition",
-          isChecked && "bg-gradient-to-r from-rose-500 to-purple-100 bg-clip-text text-transparent text-base font-black"
-        )}
-      >
-        HQ
-      </button>
+        <button
+          onClick={handleHighQuality}
+          className={twMerge(
+            "ml-11 cursor-pointer text-xs rounded-lg px-2 py-1 text-[var(--text)] transition",
+            isChecked && "bg-gradient-to-r from-rose-500 to-purple-100 bg-clip-text text-transparent text-base font-black"
+          )}
+        >
+          HQ
+        </button>
 
         <button
           // onClick={() => player.setFullScreen(true)}
@@ -305,7 +313,7 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl, favorites,
       </div>
       <SubscribeModal isOpen={isOpen} onClose={() => setIsOpen(false)} />
     </div>
-    
+
   );
 };
 

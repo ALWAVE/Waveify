@@ -1,137 +1,155 @@
 "use client";
+import { useEffect, useState, useRef } from "react";
+import clsx from "clsx";
 import useSongs from "@/hooks/useSongs";
-import PageContent from "./PageContent";
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import PageContentTopChart from "../top-chart/PageContentTopChart";
 import useTopChartSongs from "@/hooks/useTopChartSongs";
-import SmartLink from "@/component/SmartLink";
 import useForYouSongs from "@/hooks/useForYouSongs";
 import { useAuth } from "@/providers/AuthProvider";
+import PageContent from "./PageContent";
+import PageContentTopChart from "../top-chart/PageContentTopChart";
 import PageContentForYou from "./PageContentForYou";
+import SmartLink from "@/component/SmartLink";
+import {
+  StickyTabs,
+  TabsHeader,
+  useStickyProgress,
+  Tab,
+} from "@/component/TabsHeader";
 
 const ALL_VIBES = ["Joyfully", "Energetic", "Quietly", "Sad"];
 
+const tabs: Tab[] = [
+  { key: "for-you", label: "Для вас" },
+  { key: "trends", label: "Тренды" },
+];
+
 export default function Home() {
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const progress = useStickyProgress(scrollRef, 60);        // плавность ↔ threshold
+  const [activeTab, setActiveTab] = useState<"for-you" | "trends">("for-you");
+
+  /* ---------- музыка / данные ---------- */
   const [selectedVibes, setSelectedVibes] = useState<string[]>(() => {
     if (typeof window === "undefined") return ALL_VIBES;
     try {
       const stored = localStorage.getItem("selectedVibes");
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length) return parsed;
       }
-    } catch { }
+    } catch {}
     return ALL_VIBES;
   });
-
   useEffect(() => {
     localStorage.setItem("selectedVibes", JSON.stringify(selectedVibes));
   }, [selectedVibes]);
+
   const { user } = useAuth();
   const { songs, isLoading, refresh } = useSongs(selectedVibes);
-  const { songs: topSongs, isLoading: isTopLoading } = useTopChartSongs(20); // можно грузить 20, но показывать 8
+  const { songs: topSongs, isLoading: isTopLoading } = useTopChartSongs(20);
   const { songs: forYouSongs, isLoading: isForYouLoading } = useForYouSongs(user?.id);
-  useEffect(() => {
-    refresh();
-  }, [selectedVibes]);
+  useEffect(() => refresh(), [selectedVibes]);
+  /* ------------------------------------- */
 
-  const handleVibeChange = (vibe: string) => {
-    setSelectedVibes((prev) => {
-      let newVibes;
-      if (prev.includes(vibe)) {
-        newVibes = prev.filter((v) => v !== vibe);
-        if (newVibes.length === 0) return ALL_VIBES;
-      } else {
-        newVibes = [...prev, vibe];
-      }
-      return newVibes;
-    });
-  };
+  const handleVibeChange = (v: string) =>
+    setSelectedVibes((prev) =>
+      prev.includes(v)
+        ? prev.filter((x) => x !== v).length
+          ? prev.filter((x) => x !== v)
+          : ALL_VIBES
+        : [...prev, v]
+    );
 
   return (
-    <div className="bg-[var(--bgPage)] text-neutral-400 rounded-lg w-full h-full overflow-hidden overflow-y-auto md:pl-20">
+    <div
+      ref={scrollRef}
+      className="bg-[var(--bgPage)] text-neutral-400 rounded-lg w-full h-full overflow-y-auto md:pl-20 relative"
+    >
+      {/* Поточная панель (не исчезает, только fade) */}
+      <div
+        className="px-4 pt-4 mb-2"
+        style={{
+          opacity: 1 - progress,
+          pointerEvents: progress > 0.05 ? "none" : "auto",
+          transition: "opacity 0.25s ease-out",
+        }}
+      >
+        <TabsHeader tabs={tabs} activeKey={activeTab}   onChange={(key) => setActiveTab(key as "for-you" | "trends")} />
+      </div>
 
-      <div className="px-4 pb-2 pt-4">
-        <div className="flex justify-between items-center">
-          <h2 className="text-[var(--text)] text-2xl font-semibold">For You</h2>
-          {/* Можно добавить ссылку на отдельную страницу с персональными рекомендациями */}
+      {/* Фиксированная панель */}
+      <StickyTabs
+        tabs={tabs}
+        activeKey={activeTab}
+         onChange={(key) => setActiveTab(key as "for-you" | "trends")}
+        progress={progress}
+      />
+
+      {/* ---------- Контент ---------- */}
+      {activeTab === "for-you" && (
+        <div>
+          <section className="px-4 pb-2 pt-4">
+            <h2 className="text-[var(--text)] text-2xl font-semibold"></h2>
+            {isForYouLoading ? <p>Загрузка…</p> : <PageContentForYou songs={forYouSongs} />}
+          </section>
+
+          <section className="flex flex-wrap gap-2 mb-4 p-4 pt-2">
+            {ALL_VIBES.map((v) => (
+              <button
+                key={v}
+                onClick={() => handleVibeChange(v)}
+                className={clsx(
+                  "px-4 py-2 rounded-full ring-1 transition-transform hover:scale-97 active:scale-105",
+                  selectedVibes.includes(v)
+                    ? "ring-rose-500 text-rose-500"
+                    : "ring-gray-500 text-gray-500"
+                )}
+              >
+                {v}
+              </button>
+            ))}
+          </section>
+
+          <section className="mt-2 mb-7 px-6">
+            <div className="flex justify-between items-center">
+              <SmartLink href="/explore" className="text-[var(--text)] text-2xl font-semibold hover:underline">
+                New songs
+              </SmartLink>
+              <SmartLink href="/explore" className="text-sm hover:underline hover:text-rose-400">
+                Показать все
+              </SmartLink>
+            </div>
+            {isLoading ? <p>Загрузка…</p> : <PageContent songs={songs.slice(0, 24)} />}
+          </section>
+
+          <section className="mt-2 mb-7 px-6">
+            <div className="flex justify-between items-center">
+              <SmartLink href="/explore" className="text-[var(--text)] text-2xl font-semibold hover:underline">
+                Recently listened to
+              </SmartLink>
+              <SmartLink href="/explore" className="text-sm hover:underline hover:text-rose-400">
+                Показать все
+              </SmartLink>
+            </div>
+            {isLoading ? <p>Загрузка…</p> : <PageContent songs={songs.slice(0, 24)} />}
+          </section>
         </div>
-        {isForYouLoading ? (
-          <p>Загрузка For You...</p>
-        ) : (
-          <PageContentForYou songs={forYouSongs} />
-        )}
+      )}
 
-      </div>
-
-      <div className="px-4">
-        <div className="flex justify-between items-center">
-          <SmartLink href="/top-chart" className="text-[var(--text)] text-2xl font-semibold hover:underline">Top Chart</SmartLink>
-          <SmartLink
-            href="/top-chart"
-            className="text-sm text-[var(--text)] hover:underline hover:text-rose-400 transition "
-          >
-            Показать все
-          </SmartLink>
-        </div>
-        {isTopLoading ? (
-          <p>Загрузка...</p>
-        ) : (
-          <PageContentTopChart songs={topSongs.slice(0, 8)} />
-        )}
-      </div>
-
-      <div className="flex flex-wrap gap-2 mb-4 p-4 pt-8">
-        {ALL_VIBES.map((vibe) => (
-          <button
-            key={vibe}
-            onClick={() => handleVibeChange(vibe)}
-            className={`px-4 py-2 rounded-full bg-transparent ring-1 cursor-pointer hover:scale-97 active:scale-105 ${selectedVibes.includes(vibe)
-              ? "ring-rose-500 text-rose-500"
-              : "ring-gray-500 text-gray-500"
-              }`}
-          >
-            {vibe}
-          </button>
-        ))}
-      </div>
-      <div className="mt-2 mb-7 px-6">
-        <div className="flex justify-between items-center">
-          <SmartLink href="/explore" className="text-[var(--text)] text-2xl font-semibold hover:underline">New songs</SmartLink>
-
-          <div className="mb-4">
-
+      {activeTab === "trends" && (
+        <section className="px-4 pb-8 pt-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-[var(--text)] text-2xl font-semibold">Тренды</h2>
+              <p className="text-sm text-neutral-500">Популярные чарты и рост треков</p>
+            </div>
+            <SmartLink href="/top-chart" className="text-sm hover:underline hover:text-rose-400">
+              Показать все
+            </SmartLink>
           </div>
-          <SmartLink
-            href="/explore"
-            className="text-sm text-[var(--text)] hover:underline hover:text-rose-400 transition "
-          >
-            Показать все
-          </SmartLink>
-        </div>
-        {isLoading ? <p>Загрузка...</p> : <PageContent songs={songs.slice(0, 24)} />}
-
-      </div>
-
-      <div className="mt-2 mb-7 px-6">
-        <div className="flex justify-between items-center">
-          <SmartLink href="/explore" className="text-[var(--text)] text-2xl font-semibold hover:underline">Recently listened to</SmartLink>
-
-          <div className="mb-4">
-
-          </div>
-          <SmartLink
-            href="/explore"
-            className="text-sm text-[var(--text)] hover:underline hover:text-rose-400 transition "
-          >
-            Показать все
-          </SmartLink>
-        </div>
-        {isLoading ? <p>Загрузка...</p> : <PageContent songs={songs.slice(0, 24)} />}
-
-      </div>
-
-    </div >
+          {isTopLoading ? <p>Загрузка…</p> : <PageContentTopChart songs={topSongs.slice(0, 8)} />}
+        </section>
+      )}
+    </div>
   );
 }

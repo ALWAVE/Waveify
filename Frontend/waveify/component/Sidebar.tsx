@@ -45,31 +45,10 @@ const Sidebar: React.FC<SidebarProps> = () => {
   const onClickCreate = () => {
     uploadModal.onOpen();
   };
-  
+
   const onClickBeatCreate = () => {
     uploadBeatModal.onOpen();
   };
-
-  const route = useMemo(
-    () => [
-      {
-        icon: <LuYoutube size={26} />,
-        label: "YouTube Download",
-        active: pathname === "/youtube-download",
-        href: "/youtube-download",
-        iconActive: <TiSocialYoutube size={26} />,
-      },
-      {
-        icon: <LuChartNoAxesColumn size={26} />,
-        label: "TopCharts",
-        active: pathname === "/top-chart",
-        href: "/top-chart",
-        iconActive: <LuChartNoAxesColumn size={26} />,
-      },
-      // Добавьте другие маршруты, если нужно
-    ],
-    [pathname]
-  );
 
   return (
     <div>
@@ -109,7 +88,7 @@ const Sidebar: React.FC<SidebarProps> = () => {
                   {
                     label: "Create Playlist",
                     href: user ? "/item1" : undefined, // Проверка авторизации
-                                        description: "Create playlist for your collection",
+                    description: "Create playlist for your collection",
                     iconItem: <MdOutlinePlaylistAddCircle size={26} />,
                   },
                   {
@@ -121,7 +100,7 @@ const Sidebar: React.FC<SidebarProps> = () => {
                   },
                 ]}
               />
-              
+
               {user && (
                 <SidebarItem
                   label="Your collection"
@@ -132,13 +111,26 @@ const Sidebar: React.FC<SidebarProps> = () => {
                   positionToolTipe="right"
                   textColorActive="[var(--bg)]"
                 />
-                
+
               )}
               {user && (<hr className="mx-2 border-t-[0.5px] border-neutral-700" />)}
-          
+              {user && (
+                <SidebarItem
+                  label="YT Download"
+                  active={pathname === "/youtube-download"}
+                  icon={<LuYoutube size={26} />}
+                  iconActive={<LuYoutube size={26} />}
+                  href="/collection"
+                  positionToolTipe="right"
+                  textColorActive="[var(--bg)]"
+                />
+
+              )}
+              {user && (<hr className="mx-2 border-t-[0.5px] border-neutral-700" />)}
+
 
               {favorites.includes("Favorite") && user && (
-                
+
                 <SidebarItem
                   label="Favorite"
                   active={pathname === "/collection/favorite"}
@@ -174,11 +166,7 @@ const Sidebar: React.FC<SidebarProps> = () => {
                 />
               )}
 
-              {route.map((item) => (
-                user ? (
-                  <SidebarItem key={item.label} {...item} positionToolTipe="right" />
-                ) : null // Если пользователь не авторизован, не отображаем элемент
-              ))}
+            
             </div>
           </Box>
         </div>

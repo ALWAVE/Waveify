@@ -71,10 +71,14 @@ const SongTable: React.FC<SongTableProps> = ({ tracks, updateLikedSongs, onPlay 
 
                 <td className="py-3 text-right pr-4">
                   <SongLikeButton
-                    songId={track.id} // передаем id песни
+                    songId={track.id}
+                    title={track.title}
+                    author={track.author}
+                    imagePath={track.imagePath}
                     toolTipePosition="left"
-                    updateLikedSongs={updateLikedSongs} // передаем функцию для обновления лайков
+                
                   />
+
                 </td>
               </tr>
             ))}

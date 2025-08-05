@@ -2,16 +2,19 @@
   "name": "waveify",
   "version": "0.1.0",
   "private": true,
+  "main": "dist-electron/main.js",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "dev:web": "cd waveify && next dev",
-    "build:web": "next build && next export",
-    "start:web": "cd waveify && next start",
-    "dev:desktop": "cd waveify && next dev & electron ./desktop/main.js",
-    "build:desktop": "npm run build:web && electron ../desktop/main.js && electron-builder"
+    "dev:web": "next dev",
+    "build:web": "next build",
+    "start:web": "next start",
+    "dev:desktop": "concurrently \"next dev\" \"npm:dev:electron\"",
+    "dev:electron": "tsc -p tsconfig.electron.json && electron ./dist-electron/main.js",
+    "build:electron": "tsc -p tsconfig.electron.json",
+    "dist": "npm run build:web && npm run build:electron && electron-builder"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.4",
@@ -21,7 +24,6 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "colorthief": "^2.6.0",
-    "electron-builder": "^26.0.12",
     "electron-updater": "^6.6.2",
     "framer-motion": "^12.6.3",
     "lucide-react": "^0.482.0",
@@ -35,6 +37,7 @@
     "react-howler": "^5.2.0",
     "react-icons": "^5.5.0",
     "react-router-dom": "^7.5.1",
+    "react-wavify": "^1.11.1",
     "tailwind-merge": "^3.0.2",
     "uniqid": "^5.4.0",
     "use-sound": "^5.0.0",
@@ -47,9 +50,34 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "concurrently": "^8.2.2",
+    "electron": "^35.0.2",
+    "electron-builder": "^26.0.12",
     "eslint": "^9",
     "eslint-config-next": "15.2.2",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "build": {
+    "appId": "com.waveify.player",
+    "productName": "Waveify",
+    "executableName": "Waveify",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "dist-electron/**/*",
+      "public/**/*"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "public/logo_new.ico"
+    },
+    "extraMetadata": {
+      "name": "Waveify",
+      "productName": "Waveify",
+      "description": "Вейфи Музыка"
+    }
   }
 }

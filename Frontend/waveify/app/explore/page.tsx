@@ -63,7 +63,7 @@ const ExplorePage = () => {
         <div className="px-6 py-8 text-white bg-[var(--bgPage)] h-full rounded-lg">
 
            
-            <SearchInput className="md:hidden mb-4" inputClassName="bg-[var(--bg)] text-2xl" />
+            <SearchInput className="md:hidden mb-4"/>
                   
             
             

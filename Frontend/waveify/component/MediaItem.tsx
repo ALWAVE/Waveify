@@ -107,7 +107,7 @@ const MediaItem: React.FC<MediaItemProps> = ({ data, onClick }) => {
         </div>
         <div ref={authorRef}>
           <MarqueeText
-            text={`By ${data.author}`}
+            text={`${data.author}`}
             isOverflowing={isAuthorOverflowing}
             className="text-neutral-400 text-sm"
           />

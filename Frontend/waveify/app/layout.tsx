@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google"; 
+import { Inter } from "next/font/google";
 // figtree
 import "./globals.css";
 import Sidebar from "@/component/Sidebar";
@@ -12,6 +12,7 @@ import ToasterProvider from "@/providers/ToasterProvider";
 import AuthPoster from "@/component/AuthPoster";
 import CookieConsent from "@/component/CookieConsent";
 import DisableContextMenu from "@/component/DisableContextMenu";
+import ElectronGate from "@/component/ElectronGate";
 
 
 const figtree = Inter({ subsets: ["latin"] })
@@ -30,6 +31,8 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const isElectron = typeof navigator !== "undefined" &&
+    navigator.userAgent.toLowerCase().includes("electron");
   return (
     <html lang="en">
       <head>
@@ -42,13 +45,13 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>
       <body className={`bg-[var(--bg)] ${figtree.className}`}>
-          <DisableContextMenu />
+        <DisableContextMenu />
         <ToasterProvider />
-
         <AuthProvider>
+
           <ModalProvider />
           <CookieConsent />
-          <div className="flex flex-col h-screen bg-[var(--bg)]">
+          <div className="flex flex-col h-screen bg-[var(--bg)] ">
             <Header />
             <TitleBar />
             <div className="flex flex-1 overflow-hidden">
@@ -64,6 +67,7 @@ export default function RootLayout({
             <AuthPoster />
             {/* <FullScreenPlayer /> */}
           </div>
+
         </AuthProvider>
 
       </body>

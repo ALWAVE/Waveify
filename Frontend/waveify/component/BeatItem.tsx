@@ -3,7 +3,6 @@
 import { useState } from "react"
 
 import { HiOutlineDownload } from "react-icons/hi";
-import PlayButton from "./PlayButton"
 import ButtonLogin from "./ButtonLogin"
 import { LiaShoppingBagSolid } from "react-icons/lia";
 import SongRating from "./SongRating";
