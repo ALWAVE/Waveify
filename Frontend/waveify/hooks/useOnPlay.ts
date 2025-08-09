@@ -1,8 +1,10 @@
 import { Song } from "@/models/Song";
-import usePlayer from "./usePlayer";
+
 import { useEffect, useState } from "react";
 import { listenToSong } from "./listenToSong";
 import { useAuth } from "@/providers/AuthProvider";
+import usePlayer from "./usePlayer";
+
 
 
 const useOnPlay = (songs: Song[]) => {

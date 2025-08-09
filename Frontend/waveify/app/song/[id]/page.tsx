@@ -11,6 +11,8 @@ import { IoIosFlag } from "react-icons/io";
 import Link from "next/link";
 import { useLikeSong } from "@/hooks/useLikeSong";
 import useOnPlay from "@/hooks/useOnPlay";
+import { useEffect, useRef, useState } from "react";
+import { FastAverageColor } from "fast-average-color";
 
 const SongPage = () => {
   const params = useParams();
@@ -18,15 +20,49 @@ const SongPage = () => {
 
   const { song, isLoading, error } = useGetSongById(id);
   const player = usePlayer();
-
   const { likes } = useLikeSong(song?.id ?? "");
   const onPlay = useOnPlay(song ? [song] : []);
+
+  const [bgColor, setBgColor] = useState("#000000");
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  // Определяем доминирующий цвет
+  useEffect(() => {
+    if (!song?.imagePath || !imgRef.current) return;
+
+    const imgEl = imgRef.current;
+    const fac = new FastAverageColor();
+
+    const handleLoad = () => {
+      fac.getColorAsync(imgEl, { mode: "speed" })
+        .then(color => {
+          if (color.hex) {
+            setBgColor(color.hex);
+          }
+        })
+        .catch(err => {
+          console.warn("Не удалось извлечь цвет:", err);
+        });
+    };
+
+
+    if (imgEl.complete && imgEl.naturalWidth > 0) {
+      handleLoad();
+    } else {
+      imgEl.addEventListener("load", handleLoad);
+    }
+
+    return () => imgEl.removeEventListener("load", handleLoad);
+  }, [song?.imagePath]);
+
   if (isLoading) return <div>Загрузка...</div>;
   if (error) return <div>Ошибка: {error}</div>;
   if (!song) return <div>Песня не найдена.</div>;
 
   const isPlaying = player.activeId === song.id && player.isPlaying;
-
+  const proxyUrl = song?.imagePath
+    ? `http://77.94.203.78:5000/api/ImageProxy?url=${encodeURIComponent(song.imagePath)}`
+    : "";
   const handlePlayStop = () => {
     if (isPlaying) player.stop?.();
     else onPlay(song.id);
@@ -34,117 +70,117 @@ const SongPage = () => {
 
   const handleShare = async () => {
     try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(window.location.href);
-        toast.success("Ссылка скопирована!");
-      } else {
-        const textArea = document.createElement("textarea");
-        textArea.value = window.location.href;
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textArea);
-        toast.success("Ссылка скопирована!");
-      }
-    } catch (error) {
+      await navigator.clipboard.writeText(window.location.href);
+      toast.success("Ссылка скопирована!");
+    } catch {
       toast.error("Не удалось скопировать ссылку");
-      console.error("Ошибка копирования:", error);
     }
   };
 
   return (
-    <div className="
-      p-4
-      bg-[var(--bgPage)]
-      rounded-lg
-      w-full h-full
-      overflow-hidden
-      overflow-y-auto"
+    <div
+      className="relative w-full h-full overflow-y-auto rounded-lg"
+      style={{
+        backgroundColor: bgColor,
+        transition: "background-color 0.5s ease",
+      }}
     >
-      {/* Заголовок с изображением и информацией о песне */}
-      <div className="relative bg-[var(--bg)] py-5 rounded-lg mb-4">
-        <div className="container mx-auto px-4 flex flex-col md:flex-row justify-left items-center gap-6">
-          {song.imagePath && (
-            <img src={song.imagePath} alt={song.title} className="w-64 h-64 rounded-lg shadow-lg" />
-          )}
-          <div className="flex flex-col">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-2 text-[var(--text)]">{song.title}</h1>
-            <div>
-              <Link href={`/explore?query=${song.author}`} className="cursor-pointer hover:underline relative group text-[var(--text)]">
-                {song.author}
-                <Tooltip label={`Search: ${song.author}`} position="bottom" />
-              </Link>
-              <span className="text-[var(--text)]">
-                • {song.createAt ? new Date(song.createAt).toLocaleDateString('en-En', { year: 'numeric', month: 'long', day: 'numeric' }) : ""}
+      {/* Скрытая картинка для анализа цвета */}
+      {song.imagePath && (
+        <img
+          ref={imgRef}
+          src={proxyUrl}
+          alt=""
+          crossOrigin="anonymous"
+          className="hidden"
+        />
+      )}
+
+      {/* Контент */}
+      <div className="relative p-6">
+        <div className="max-w-5xl mx-auto bg-black/40 backdrop-blur-md rounded-2xl p-6 shadow-lg">
+          <div className="flex flex-col md:flex-row gap-6 items-center">
+            {/* Обложка */}
+            {song.imagePath && (
+              <img
+                src={song.imagePath}
+                alt={song.title}
+                className="w-64 h-64 rounded-xl shadow-2xl object-cover"
+              />
+            )}
+
+            {/* Информация */}
+            <div className="flex flex-col flex-1 min-w-0">
+              <h1 className="text-4xl font-bold mb-2 text-white">{song.title}</h1>
+              <div className="flex flex-wrap items-center gap-2 text-white/80">
+                <Link
+                  href={`/explore?query=${song.author}`}
+                  className="hover:underline"
+                >
+                  {song.author}
+                  <Tooltip label={`Search: ${song.author}`} position="bottom" />
+                </Link>
+                <span>• {song.createAt
+                  ? new Date(song.createAt).toLocaleDateString("en-En", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })
+                  : ""}</span>
+              </div>
+              <span className="text-sm text-white/60 mt-4">
+                Длительность: {song.duration}
               </span>
-            </div>
-            <span className="text-sm text-neutral-400 mt-6">Длительность: {song.duration}</span>
-            <Link href={`/profile/${song.userId}`} className="text-neutral-500 hover:underline hover:text-[var(--text)] cursor-pointer transition">
-              Go to the author's profile
-            </Link>
-          </div>
-        </div>
-
-        {/* КНОПКИ управления: лайк - плей - поделиться */}
-        <div className="flex items-center justify-center gap-10 mt-8">
-          {/* Like */}
-          <button
-            className="flex flex-col items-center text-rose-300 hover:bg-rose-100/10 p-4 rounded-full transition"
-          >
-            <Heart size={28} />
-            <span className="text-xs text-rose-300 font-bold mt-1">{likes}</span>
-            <Tooltip label="В избранное" position="top" />
-          </button>
-
-          {/* Play */}
-          <PlayButtonVisible
-            isPlaying={isPlaying}
-            onClick={handlePlayStop}
-            className="p-6 text-3xl bg-rose-500/90 hover:bg-rose-400 shadow-xl active:scale-95"
-          />
-
-          {/* Share */}
-          <button
-            className="flex flex-col items-center text-neutral-400 hover:bg-neutral-700/20 p-4 rounded-full transition"
-            onClick={handleShare}
-          >
-            <Share2 size={28} />
-            <span className="text-xs text-neutral-400 mt-1">Share</span>
-            <Tooltip label="Поделиться" position="top" />
-          </button>
-        </div>
-      </div>
-
-      {/* About section */}
-      <div className="container mx-auto bg-[var(--bg)] rounded-lg border border-neutral-800 mt-6">
-        <div className="p-4 border-b border-neutral-800">
-          <h2 className="text-xl font-bold text-[var(--text)]">About this song</h2>
-        </div>
-        <div className="p-4">
-          <div className="mt-4 grid grid-cols-2 gap-4">
-            <div>
-              <h3 className="text-sm font-medium text-neutral-300 mb-1">Release Date</h3>
-              <p className="text-neutral-400 text-sm">{song.createAt}</p>
-            </div>
-            <div>
-              <h3 className="text-sm font-medium text-neutral-300 mb-1">Producer</h3>
-              <p className="text-neutral-400 text-sm">{song.author}</p>
+              <Link
+                href={`/profile/${song.userId}`}
+                className="text-white/70 hover:text-white mt-1"
+              >
+                Go to the author's profile
+              </Link>
             </div>
           </div>
-          <span className="flex items-center text-rose-500 hover:text-rose-400 cursor-pointer transition">
-            <IoIosFlag className="mr-1" />
-            Report Track
-          </span>
-        </div>
-      </div>
 
-      {/* Comment section */}
-      <div className="container mx-auto bg-[var(--bg)] rounded-lg border border-neutral-800 mt-6">
-        <div className="p-4">
-          <h2 className="text-xl font-bold text-[var(--text)]">Comments</h2>
-        </div>
-        <div className="p-4">
-          {/* Можно добавить описание песни или комментарии */}
+          {/* Кнопки */}
+          <div className="flex items-center justify-center gap-10 mt-8">
+            <button className="flex flex-col items-center text-rose-300 hover:bg-rose-100/10 p-4 rounded-full transition">
+              <Heart size={28} />
+              <span className="text-xs font-bold mt-1">{likes}</span>
+              <Tooltip label="В избранное" position="top" />
+            </button>
+
+            <PlayButtonVisible
+              isPlaying={isPlaying}
+              onClick={handlePlayStop}
+              className="p-6 text-3xl bg-rose-500/90 hover:bg-rose-400 shadow-xl active:scale-95"
+            />
+
+            <button
+              className="flex flex-col items-center text-white/80 hover:bg-white/10 p-4 rounded-full transition"
+              onClick={handleShare}
+            >
+              <Share2 size={28} />
+              <span className="text-xs mt-1">Share</span>
+              <Tooltip label="Поделиться" position="top" />
+            </button>
+          </div>
+
+          {/* About */}
+          <div className="mt-6 bg-black/30 rounded-xl p-4 border border-white/10">
+            <h2 className="text-xl font-bold text-white mb-4">About this song</h2>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <h3 className="text-sm font-medium text-white/70">Release Date</h3>
+                <p className="text-white/50 text-sm">{song.createAt}</p>
+              </div>
+              <div>
+                <h3 className="text-sm font-medium text-white/70">Producer</h3>
+                <p className="text-white/50 text-sm">{song.author}</p>
+              </div>
+            </div>
+            <span className="flex items-center text-rose-400 hover:text-rose-300 cursor-pointer mt-4">
+              <IoIosFlag className="mr-1" /> Report Track
+            </span>
+          </div>
         </div>
       </div>
     </div>

@@ -364,7 +364,7 @@ const SearchInput: React.FC<SearchInputProps> = ({ className }) => {
                       setFilterOpen(false);
                       setShowDropdown(false);
                     }}
-                    className={`block w-full text-left px-4 py-2 text-sm transition rounded-lg hover:bg-[var(--bgPage)]`}
+                    className={`block w-full text-left px-4 py-2 text-sm transition rounded-lg hover:bg-[var(--bgPage)] hover:opacity-45`}
                     style={{
                       background: selectedFilter === option.value ? "rgba(230, 35, 77, 0.93)" : "transparent",
                       color: selectedFilter === option.value ? "#fff" : "var(--text)",

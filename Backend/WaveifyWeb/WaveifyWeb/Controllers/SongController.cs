@@ -13,6 +13,8 @@ using Microsoft.Extensions.Options;
 using Waveify.Core.Enums;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Http.Headers;
+
 namespace Waveify.API.Controllers
 {
     [ApiController]

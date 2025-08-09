@@ -84,7 +84,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login" }: Au
                 initial="hidden"
                 animate="visible"
                 exit="exit"
-                className="fixed inset-0 z-40 bg-gradient-to-br from-[#0e0e0e]/70 to-[#1a0f1f]/70 backdrop-blur-sm"
+                className="fixed inset-0 z-45 bg-gradient-to-br from-[#0e0e0e]/70 to-[#1a0f1f]/70 backdrop-blur-sm"
               />
             </Dialog.Overlay>
 

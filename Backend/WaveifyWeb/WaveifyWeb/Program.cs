@@ -64,6 +64,8 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Waveify API", Version = "v1" });
     c.MapType<IFormFile>(() => new OpenApiSchema { Type = "string", Format = "binary" });
 });
+builder.Services.AddHttpClient<IImageProxyRepository, ImageProxyRepository>()
+    .SetHandlerLifetime(TimeSpan.FromMinutes(5));
 
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<RefreshTokenRepository>();
@@ -90,6 +92,7 @@ builder.Services.AddScoped<IJwtProvider, JwtProvider>();
 
 // Подключаем аутентификацию
 builder.Services.AddApiAuthentication(builder.Configuration.GetSection("JwtOptions").Get<JwtOptions>());
+
 
 builder.Services.Configure<JwtOptions>(configuration.GetSection(nameof(JwtOptions)));
 builder.Services.AddSingleton<JwtOptions>(sp =>

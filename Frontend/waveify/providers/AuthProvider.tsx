@@ -2,11 +2,13 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import toast from "react-hot-toast";
-import usePlayer from "@/hooks/usePlayer";
+
 import LoadingScreen from "@/component/LoadingScreen";
 import GenreSelectModal from "@/component/GenreSelectionModal";
 import AuthModal from "@/component/AuthModal";
 import ElectronGate from "@/component/ElectronGate";
+import usePlayer from "@/hooks/usePlayer";
+
 
 interface AuthContextType {
   user: any;

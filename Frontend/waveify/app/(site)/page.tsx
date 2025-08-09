@@ -65,6 +65,7 @@ export default function Home() {
       ref={scrollRef}
       className="bg-[var(--bgPage)] text-neutral-400 rounded-lg w-full h-full overflow-y-auto md:pl-20 relative"
     >
+      
       {/* Поточная панель (не исчезает, только fade) */}
       <div
         className="px-4 pt-4 mb-2"

@@ -4,41 +4,77 @@ interface PlayerStore {
   ids: string[];
   activeId?: string;
   isPlaying: boolean;
+
+  // громкость
   volume: number;
   volumeLoaded: boolean;
 
+  // полноэкранный режим
+  fullScreen: boolean;
+
+  // управление треками/состоянием
   setId: (id: string) => void;
   setIds: (ids: string[]) => void;
   play: () => void;
   pause: () => void;
+  stop: () => void;
   reset: () => void;
+
+  // громкость (c сохранением)
   setVolume: (volume: number) => void;
   loadVolume: () => void;
-  stop: () => void; 
+
+  // фуллскрин
+  setFullScreen: (v: boolean) => void;
 }
 
-const usePlayer = create<PlayerStore>((set) => ({
+const usePlayer = create<PlayerStore>((set, get) => ({
   ids: [],
   activeId: undefined,
   isPlaying: false,
-  volume: 1, // По умолчанию, пока не загружено
+
+  // по умолчанию 1, пока не загрузили из localStorage
+  volume: 1,
   volumeLoaded: false,
+
+  // fullscreen overlay UI
+  fullScreen: false,
 
   setId: (id: string) => set({ activeId: id, isPlaying: true }),
   setIds: (ids: string[]) => set({ ids }),
+
   play: () => set({ isPlaying: true }),
   pause: () => set({ isPlaying: false }),
-  reset: () => set({ ids: [], activeId: undefined, isPlaying: false }),
+  stop: () => set({ isPlaying: false, activeId: undefined }),
+  reset: () =>
+    set({ ids: [], activeId: undefined, isPlaying: false, fullScreen: false }),
+
   setVolume: (volume: number) => {
     set({ volume });
-    localStorage.setItem("volume", volume.toString());
+    // защита от SSR
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("volume", String(volume));
+      } catch {
+        /* noop */
+      }
+    }
   },
+
   loadVolume: () => {
-    const storedVolume = localStorage.getItem("volume");
-    const volume = storedVolume ? parseFloat(storedVolume) : 1;
+    let volume = 1;
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("volume");
+        volume = stored ? Math.min(1, Math.max(0, parseFloat(stored))) : 1;
+      } catch {
+        volume = 1;
+      }
+    }
     set({ volume, volumeLoaded: true });
   },
-  stop: () => set({ isPlaying: false, activeId: undefined }),
+
+  setFullScreen: (v: boolean) => set({ fullScreen: v }),
 }));
 
 export default usePlayer;
