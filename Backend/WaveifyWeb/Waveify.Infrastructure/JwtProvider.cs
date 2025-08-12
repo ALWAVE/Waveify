@@ -23,27 +23,27 @@ namespace Waveify.Infrastructure
 
         public string GenerateToken(User user)
         {
-            // Исправлено: используется фигурные скобки для создания массива
-            Claim[] claims = {
-                new Claim("userId", user.Id.ToString()),
-                new Claim(ClaimTypes.Role, user.Role.ToString())
-            };
+            // всегда UTC
+            var now = DateTime.UtcNow;
 
-            var signingCredentials = new SigningCredentials(
-             new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.SecretKey)),
-             SecurityAlgorithms.HmacSha256);
+            var claims = new List<Claim>
+        {
+            new Claim("userId", user.Id.ToString()),
+            new Claim(ClaimTypes.Name, user.UserName ?? user.Email),
+            new Claim(ClaimTypes.Role, user.Role.ToString())
+        };
 
-                // Генерация токена
-                var token = new JwtSecurityToken(
-                    claims: claims,
-                    signingCredentials: signingCredentials,
-                    expires: DateTime.UtcNow.AddHours(_options.ExpitesHourse)
-                );
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.SecretKey));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-                // Преобразуем токен в строку
-                var tokenValue = new JwtSecurityTokenHandler().WriteToken(token);
+            var jwt = new JwtSecurityToken(
+                claims: claims,
+                notBefore: now.AddSeconds(-10),            // небольшой допуск на рассинхрон
+                expires: now.AddMinutes(15),             // НОРМАЛЬНЫЙ срок access токена
+                signingCredentials: creds
+            );
 
-                return tokenValue;
+            return new JwtSecurityTokenHandler().WriteToken(jwt);
         }
     }
 }

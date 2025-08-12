@@ -1,5 +1,9 @@
+// component/PlayerContent.tsx
+"use client";
+
 import React, { useState, useEffect, useRef } from "react";
 import useSound from "use-sound";
+import { Howler } from "howler"; // ⟵ добавили
 import { BsPauseFill } from "react-icons/bs";
 import { TbPlayerPlayFilled } from "react-icons/tb";
 import { FaBackwardStep, FaForwardStep } from "react-icons/fa6";
@@ -17,6 +21,8 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 import SubscribeModal from "./SubscribeModal";
 import FullScreenPlayer from "./FullScreenPlayer";
+import useAudioFx from "@/hooks/useAudioFx";
+import VolumeControl from "./VolumeControl";
 
 interface PlayerContentProps {
   song: Song;
@@ -39,6 +45,8 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
   const [sliderValue, setSliderValue] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
 
+  const fx = useAudioFx();
+
   const [tooltipTime, setTooltipTime] = useState(0);
   const [hoveringSlider, setHoveringSlider] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
@@ -46,16 +54,43 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
 
   const isSeeking = useRef(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const previousVolumeRef = useRef(1);
 
   const volume = player.volume;
   const Icon = isPlaying ? BsPauseFill : TbPlayerPlayFilled;
   const iconSize = isPlaying ? 26 : 22;
   const VolumeIcon = volume === 0 ? HiSpeakerXMark : HiSpeakerWave;
 
+  // восстановим состояние HQ из localStorage
   useEffect(() => {
-    const highQuality = typeof window !== "undefined" ? localStorage.getItem("toggleHighQuality") : null;
+    const highQuality =
+      typeof window !== "undefined" ? localStorage.getItem("toggleHighQuality") : null;
     if (highQuality != null) setIsChecked(JSON.parse(highQuality));
   }, []);
+
+  // HQ пресет (оставил твои значения)
+  useEffect(() => {
+    if (!fx.ready) return;
+
+    if (isChecked) {
+      fx.setLowShelfFreq(100);
+      fx.setLowShelfDb(6);
+      fx.setHighShelfFreq(9000);
+      fx.setHighShelfDb(10);
+      fx.setPresenceDb(1.5);
+
+      fx.setDrive(0.02);
+      fx.setHeadroomDb(8);
+      fx.setCeilingDb(-1);
+      fx.setLookaheadMs(4);
+      fx.setMakeup(1);
+      fx.setWet(1);
+     
+      fx.setEnabled(true);
+    } else {
+      fx.setEnabled(false);
+    }
+  }, [isChecked, fx.ready]); // eslint-disable-line
 
   const handleHighQuality = () => {
     const next = !isChecked;
@@ -63,11 +98,11 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
     if (typeof window !== "undefined") {
       localStorage.setItem("toggleHighQuality", JSON.stringify(next));
     }
-    next ? (toast.success("High Quality On"), setIsOpen(true)) : toast.error("High Quality Off");
   };
 
   const [play, { pause, sound }] = useSound(songUrl, {
     volume,
+    html5: false, // WebAudio
     onplay: () => setIsPlaying(true),
     onpause: () => setIsPlaying(false),
     onend: () => {
@@ -82,6 +117,7 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
 
     if (isPlaying) {
       pause();
+      player.pause();
       return;
     }
 
@@ -92,6 +128,7 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
       setSliderValue(0);
     }
     play();
+    player.play();
   };
 
   const handleNext = () => {
@@ -121,12 +158,11 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
     isSeeking.current = false;
   };
 
-  let previousVolume = 1;
   const toggleMute = () => {
     if (volume === 0) {
-      player.setVolume(previousVolume);
+      player.setVolume(previousVolumeRef.current);
     } else {
-      previousVolume = volume;
+      previousVolumeRef.current = volume;
       player.setVolume(0);
     }
   };
@@ -134,7 +170,59 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
     player.setVolume(newVolume);
   };
 
-  // ЕДИНСТВЕННЫЙ интервал — отслеживаем позицию
+  // ───────────────────────────
+  // ГРОМКОСТЬ: синхронизация
+  // ───────────────────────────
+
+  // 1) Подтягиваем сохранённую громкость при маунте + применяем к master
+  useEffect(() => {
+    if (!player.volumeLoaded) {
+      player.loadVolume();
+    }
+    try {
+      Howler.volume(player.volume);
+    } catch { }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // 2) Любое изменение store.volume → обновляем Howler.masterGain и текущий Howl
+  // 2) Любое изменение store.volume → плавно гоним masterGain через WebAudio automation
+  useEffect(() => {
+    const h: any = Howler;
+    const ctx: AudioContext | undefined = h?.ctx;
+    const mg: GainNode | undefined = h?.masterGain;
+
+    if (ctx && mg) {
+      const now = ctx.currentTime;
+      try {
+        // отменяем прошлые кривые и плавно тянем к новой цели
+        mg.gain.cancelScheduledValues(now);
+        // timeConstant ~ 60–90ms даёт мягкое, но отзывчивое ощущение
+        mg.gain.setTargetAtTime(volume, now, 0.06);
+      } catch { }
+    } else {
+      // fallback, если вдруг Howler не в WebAudio
+      try { Howler.volume(volume); } catch { }
+      try { sound?.volume(volume); } catch { }
+    }
+  }, [volume, sound]);
+
+
+  // 3) Создался новый sound (новый трек) → сразу выставляем ему громкость
+  useEffect(() => {
+    if (!sound) return;
+    try {
+      sound.volume(player.volume);
+    } catch { }
+    try {
+      Howler.volume(player.volume);
+    } catch { }
+  }, [sound, player.volume]);
+
+
+  // ───────────────────────────
+
+  // позиция
   useEffect(() => {
     if (!sound) return;
     if (intervalRef.current) {
@@ -155,25 +243,28 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
     };
   }, [sound]);
 
-  // длительность трека
+  // длительность
   useEffect(() => {
     if (!sound) return;
     const d = sound.duration();
     if (typeof d === "number") setDuration(d);
   }, [sound]);
 
-  // автоплей при загрузке нового sound
+  // автоплей при новом треке
   useEffect(() => {
     setPosition(0);
     setSliderValue(0);
     setIsDragging(false);
-    if (sound && !isSecondary) sound.play();
+    if (sound && !isSecondary) {
+      sound.play();
+      player.play();
+    }
     return () => {
       sound?.unload();
     };
-  }, [sound, isSecondary]);
+  }, [sound, isSecondary]); // eslint-disable-line
 
-  // свайп вверх -> открыть фуллскрин
+  // свайп вверх -> фуллскрин
   const touchStartY = useRef(0);
   const touchEndY = useRef(0);
   const openIfSwipeUp = () => {
@@ -195,9 +286,10 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
         {/* Left: Song info */}
         <div className="flex justify-start items-center min-w-0 gap-2">
           <div className="min-w-0 max-w-[60%]">
-            <Link href={`/song/${song.id}`} passHref>
-              <MediaItem data={song} />
-            </Link>
+            <MediaItem
+              data={song}
+
+            />
           </div>
           <SongLikeButton
             songId={song?.id}
@@ -265,36 +357,39 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
           </div>
         </div>
 
-        {/* Right: Volume + expand */}
-        <div className="hidden md:flex justify-end w-full pr-2">
+        {/* Right: Volume + expand + HQ */}
+        <div className="hidden md:flex items-center justify-end w-full pr-2 gap-2 shrink-0">
           <button
             onClick={handleHighQuality}
             className={twMerge(
-              "ml-11 cursor-pointer text-xs rounded-lg px-2 py-1 text-[var(--text)] transition",
-              isChecked &&
-                "bg-gradient-to-r from-rose-500 to-purple-100 bg-clip-text text-transparent text-base font-black"
+              "hq-btn text-xs whitespace-nowrap",
+              isChecked ? "hq-on" : "text-[var(--text)] hover:border-white/20"
             )}
+            title="Audio Enhance"
+            aria-pressed={isChecked}
           >
-            HQ
+            <span>HQ</span>
+            {isChecked && <span aria-hidden className="hq-pulse" />}
           </button>
+
+
 
           <button
             onClick={() => player.setFullScreen(true)}
-            className="cursor-pointer ml-4 px-3 py-1 text-[var(--text)] transition"
+            className="cursor-pointer px-2 py-1 text-[var(--text)] transition shrink-0"
             aria-label="Open fullscreen"
+            title="Fullscreen player"
           >
-            <RxSize size={26} />
+            <RxSize size={22} />
           </button>
 
-          <div className="flex items-center gap-x-2 w-[180px]">
-            <VolumeIcon
-              onClick={toggleMute}
-              size={26}
-              className="cursor-pointer text-[var(--lightRose)]"
-            />
-            <Slider value={volume} onChange={handleVolumeChange} />
-          </div>
+          <VolumeControl
+            value={volume}
+            onChange={handleVolumeChange}
+            onToggleMute={toggleMute}
+          />
         </div>
+
 
         {/* мобильная кнопка развернуть */}
         <button
@@ -324,9 +419,9 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
         onPrev={handlePrev}
         onSeek={handleSeek}
         onSeekCommit={handleSeekCommit}
-        onVolume={() => {}}        // громкость во фуллскрине не нужна
+        onVolume={() => { }}
         onToggleHQ={handleHighQuality}
-        toggleMute={() => {}}      // и мут там не нужен
+        toggleMute={() => { }}
       />
     </>
   );

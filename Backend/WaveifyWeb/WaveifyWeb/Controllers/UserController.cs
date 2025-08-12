@@ -9,6 +9,7 @@ using Waveify.Application.Interfaces.Repositories;
 using Waveify.Application.Services;
 using Waveify.Core.Models;
 using Waveify.Infrastructure;
+using Waveify.Interface.Auth;
 using Waveify.Persistence.Repositories;
 namespace Waveify.API.Controllers
 {
@@ -17,12 +18,20 @@ namespace Waveify.API.Controllers
     public class UserController : ControllerBase
     {
         private readonly UserServices _userServices;
-        private readonly RefreshTokenRepository _refreshTokenRepository;
-        private readonly JwtProvider _jwtProvider;
-
-        public UserController(UserServices userServices)
+        private readonly IRefreshTokenRepository _refreshTokenRepository;
+        private readonly IJwtProvider _jwtProvider;
+        private readonly ISongRepositories _songRepo;
+        public UserController(
+        UserServices userServices,
+        IRefreshTokenRepository refreshTokenRepository,
+        IJwtProvider jwtProvider,
+        ISongRepositories songRepo // <-- ИНТЕРФЕЙС, не SongRepository
+    )
         {
             _userServices = userServices;
+            _refreshTokenRepository = refreshTokenRepository;
+            _jwtProvider = jwtProvider;
+            _songRepo = songRepo; // если используешь
         }
 
         [HttpPost("register")]
@@ -36,36 +45,34 @@ namespace Waveify.API.Controllers
         public async Task<IActionResult> Login([FromBody] LoginUserRequest request)
         {
             var token = await _userServices.Login(request.Email, request.Password);
-
             var user = await _userServices.GetUserByEmail(request.Email);
             var refreshToken = await _userServices.GenerateAndSaveRefreshToken(user.Id);
 
-            var cookieOptions = new CookieOptions
+            // DEV/HTTP: Secure=false, SameSite=Lax (т.к. без HTTPS)
+            var accessCookie = new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false, // Временно! Для продакшна — true
-                SameSite = SameSiteMode.Lax, // Lax или None
-                Expires = DateTime.UtcNow.AddHours(2)
+                Secure = false,
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTime.UtcNow.AddMinutes(15),
+                Path = "/"
+            };
+            var refreshCookie = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false,
+                SameSite = SameSiteMode.Lax,
+                Expires = refreshToken.Expires,
+                Path = "/"
             };
 
 
-            var refreshTokenOptions = new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = false, // Временно! Для продакшна — true
-                SameSite = SameSiteMode.Lax, // Lax или None
-                Expires = refreshToken.Expires
-            };
-
-            // Сохраняем оба токена в cookies
-            Response.Cookies.Append("jwt", token, cookieOptions);
-            Response.Cookies.Append("refreshToken", refreshToken.Token, refreshTokenOptions);
-
-            Console.WriteLine("✅ Кука с JWT и RefreshToken отправлена клиенту");
+            Response.Cookies.Append("jwt", token, accessCookie);
+            Response.Cookies.Append("refreshToken", refreshToken.Token, refreshCookie);
 
             return Ok(new { message = "Logged in successfully" });
         }
-    
+
         [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetById(Guid id)
         {
@@ -96,85 +103,228 @@ namespace Waveify.API.Controllers
 
         //    return Ok();
         //}
-
         [HttpGet("me")]
-        [Authorize]
-        public async Task<IActionResult> GetCurrentUser()
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> GetCurrentUser(
+      [FromServices] ISongRepositories songRepo,
+      [FromQuery] bool onlyPublished = false)
         {
-            Console.WriteLine("🔍 Запрос на /me");
-
-            var cookie = Request.Cookies["refreshToken"];
-            Console.WriteLine($"🍪 Полученная кука: {cookie}");
-
             var userIdClaim = User.FindFirst("userId");
-            if (userIdClaim == null)
-            {
-                return Unauthorized("Invalid token.");
-            }
+            if (userIdClaim == null) return Unauthorized();
 
             var userId = Guid.Parse(userIdClaim.Value);
             var user = await _userServices.GetUserById(userId);
+            if (user == null) return NotFound();
 
-            return Ok(user);
+            var songs = onlyPublished
+                ? await songRepo.GetPublishedSongsByUserId(userId)
+                : await songRepo.GetSongsByUserId(userId);
+
+            return Ok(new
+            {
+                id = user.Id,
+                userName = user.UserName,
+                email = user.Email,
+
+                // Роль явно строкой
+                role = user.Role.ToString(),
+
+                // Подписка: id + даты
+                subscriptionId = user.SubscriptionId,
+                subscriptionStart = user.SubscriptionStart, // <-- начало
+                subscriptionEnd = user.SubscriptionEnd,     // <-- конец
+
+                // Бейдж
+                subscriptionTitle = user.Subscription?.Title,
+                subscriptionColor = user.Subscription?.Color,
+
+                // Песни (как у тебя и было)
+                songs
+            });
+        }
+
+
+
+        [HttpGet("me/songs")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> GetMySongs([FromQuery] bool onlyPublished = true)
+        {
+            var userId = Guid.Parse(User.FindFirst("userId")!.Value);
+            var songs = onlyPublished
+                ? await _songRepo.GetPublishedSongsByUserId(userId) // фильтр Approved
+                : await _songRepo.GetSongsByUserId(userId);
+
+            // отдай все поля, которые ждёт UI
+            var dto = songs.Select(s => new {
+                id = s.Id,
+                title = s.Title,
+                author = s.Author,
+                duration = s.Duration,
+                createdAt = s.CreatedAt,
+                imagePath = s.ImagePath,
+                songPath = s.SongPath,
+                tags = s.Tags?.Select(t => new { id = t.Id, name = t.Name }),
+                moderationStatus = s.ModerationStatus.ToString()
+            });
+
+            return Ok(dto);
+        }
+
+        [HttpGet("me/subscription")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> GetMySubscription()
+        {
+            var userId = Guid.Parse(User.FindFirst("userId")!.Value);
+            var sub = await _userServices.GetUserSubscription(userId);
+            if (sub == null) return NoContent();
+
+            var dto = new SubscriptionDto
+            {
+                Id = sub.Id,
+                Title = sub.Title,
+                SmallTitle = sub.SmallTitle,
+                Color = sub.Color,
+                Description = sub.Description,
+                Price = sub.Price,
+                Discount = sub.Discount,
+                Features = sub.Features
+            };
+            return Ok(dto);
         }
         [HttpPost("logout")]
         public IActionResult Logout()
         {
-            Console.WriteLine("📢 Выход пользователя...");
-
-            Response.Cookies.Delete("jwt");
-
+            Response.Cookies.Delete("jwt", new CookieOptions { Path = "/" });
+            Response.Cookies.Delete("refreshToken", new CookieOptions { Path = "/" });
             return Ok(new { message = "Выход выполнен" });
         }
-        [HttpGet("refresh-token")]
+
+        [HttpGet("debug-cookies")]
+        [AllowAnonymous]
+        public IActionResult DebugCookies()
+        {
+            var hasJwt = Request.Cookies.ContainsKey("jwt");
+            var hasRt = Request.Cookies.ContainsKey("refreshToken");
+
+            var jwt = hasJwt ? Request.Cookies["jwt"] : null;
+            var rt = hasRt ? Request.Cookies["refreshToken"] : null;
+
+            return Ok(new
+            {
+                hasJwtCookie = hasJwt,
+                jwtLen = jwt?.Length ?? 0,
+                hasRefreshCookie = hasRt,
+                refreshLen = rt?.Length ?? 0,
+                refreshPreview = rt?.Length > 8 ? rt[..8] + "..." : rt
+            });
+        }
+
+
+        [HttpPost("refresh-token")]
+        [AllowAnonymous]
         public async Task<IActionResult> RefreshToken()
         {
-            var refreshToken = Request.Cookies["refreshToken"];
-            if (string.IsNullOrEmpty(refreshToken))
-            {
-                return Unauthorized("No refresh token found.");
-            }
+            var incoming = Request.Cookies["refreshToken"];
 
-            var existingToken = await _refreshTokenRepository.GetByTokenAsync(refreshToken);
-            if (existingToken == null || existingToken.Expires < DateTime.UtcNow)
+            // ✍️ Логируем что пришло
+            Console.WriteLine($"[RT] incoming cookie = '{incoming}'");
+
+            if (string.IsNullOrEmpty(incoming))
+                return Unauthorized("No refresh token found.");
+
+            // ⚠️ не используем сразу revoke, сначала пытаемся найти
+            var existing = await _refreshTokenRepository.GetByTokenAsync(incoming);
+
+            if (existing == null)
             {
+                Console.WriteLine("[RT] repo returned null for token");
                 return Unauthorized("Invalid or expired refresh token.");
             }
 
-            // Генерация нового JWT
-            var user = await _userServices.GetUserById(existingToken.UserId);
-            var newJwtToken = _jwtProvider.GenerateToken(user);
+            Console.WriteLine($"[RT] db hit: user={existing.UserId}, expires(UTC)={existing.Expires:o}, revoked={existing.IsRevoked}");
 
-            // Генерация нового refresh token
-            var newRefreshToken = await _userServices.GenerateAndSaveRefreshToken(user.Id);
+            // чуть воздуха на рассинхрон часов
+            if (existing.Expires <= DateTime.UtcNow.AddSeconds(-5) || existing.IsRevoked)
+                return Unauthorized("Invalid or expired refresh token.");
 
-            // Настройки для JWT
-            var cookieOptions = new CookieOptions
+            var user = await _userServices.GetUserById(existing.UserId);
+            if (user == null)
+                return Unauthorized("User not found.");
+
+            // 1) Генерим новый jwt + refresh
+            var newJwt = _jwtProvider.GenerateToken(user);
+            var newRefresh = await _userServices.GenerateAndSaveRefreshToken(user.Id);
+
+            // 2) Ставим куки (ВАЖНО: одинаковые опции в login/refresh)
+            var accessCookie = new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.None,
-                Expires = DateTime.UtcNow.AddHours(1) // Новый срок действия JWT
+                Secure = false,              // dev (http). В prod -> true + SameSite=None
+                SameSite = SameSiteMode.Lax, // dev
+                Expires = DateTime.UtcNow.AddMinutes(15),
+                Path = "/"
             };
-
-            // Отправляем новый JWT в куки
-            Response.Cookies.Append("jwt", newJwtToken, cookieOptions);
-
-            // Настройки для refresh token
-            var refreshTokenOptions = new CookieOptions
+            var refreshCookie = new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.None,
-                Expires = newRefreshToken.Expires
+                Secure = false,
+                SameSite = SameSiteMode.Lax,
+                Expires = newRefresh.Expires,
+                Path = "/"
             };
 
-            // Отправляем новый refresh token в куки
-            Response.Cookies.Append("refreshToken", newRefreshToken.Token, refreshTokenOptions);
+            Response.Cookies.Append("jwt", newJwt, accessCookie);
+            Response.Cookies.Append("refreshToken", newRefresh.Token, refreshCookie);
 
+            // 3) Теперь можно отозвать старый RT
+            await _refreshTokenRepository.RevokeAsync(incoming);
+
+            Console.WriteLine($"[RT] rotated: newRT={newRefresh.Token}, exp={newRefresh.Expires:o}");
             return Ok(new { message = "Token refreshed" });
         }
 
+        [HttpGet("debug-refresh")]
+        [AllowAnonymous]
+        public async Task<IActionResult> DebugRefresh([FromServices] IRefreshTokenRepository repo)
+        {
+            var incoming = Request.Cookies["refreshToken"];
+            var found = string.IsNullOrEmpty(incoming) ? null : await repo.GetByTokenAsync(incoming);
+
+            return Ok(new
+            {
+                incoming,
+                hasCookie = !string.IsNullOrEmpty(incoming),
+                dbFound = found != null,
+                db = found == null ? null : new
+                {
+                    userId = found.UserId,
+                    expiresUtc = found.Expires.ToString("o"),
+                    isRevoked = found.IsRevoked
+                },
+                nowUtc = DateTime.UtcNow.ToString("o")
+            });
+        }
+
+
+        [HttpGet("debug-auth")]
+        [AllowAnonymous]
+        public IActionResult DebugAuth()
+        {
+            var hasJwtCookie = Request.Cookies.ContainsKey("jwt");
+            var jwtLen = hasJwtCookie ? (Request.Cookies["jwt"]?.Length ?? 0) : 0;
+            var authHeader = Request.Headers["Authorization"].ToString();
+            var isAuth = User?.Identity?.IsAuthenticated ?? false;
+            var claims = User?.Claims?.Select(c => new { c.Type, c.Value });
+
+            return Ok(new
+            {
+                hasJwtCookie,
+                jwtLen,
+                authHeader,
+                isAuth,
+                claims
+            });
+        }
 
 
         //[Authorize(Roles = "Moderator")] // или временно убери защиту, пока тестишь
@@ -186,7 +336,7 @@ namespace Waveify.API.Controllers
         }
        
         [HttpGet("is-moderator")]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> IsModerator()
         {
             var userIdClaim = User.FindFirst("userId");

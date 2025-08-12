@@ -1,47 +1,53 @@
-import { Song } from "@/models/Song";
+"use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
+import { Song } from "@/models/Song";
 import { listenToSong } from "./listenToSong";
 import { useAuth } from "@/providers/AuthProvider";
 import usePlayer from "./usePlayer";
 
-
-
 const useOnPlay = (songs: Song[]) => {
   const player = usePlayer();
-  const { user } = useAuth(); // Подставь под свою реализацию
-  const [volume, setVolume] = useState(1);
+  const { user } = useAuth();
 
+  // защита от двойных кликов / гонок
+  const lockRef = useRef(false);
+
+  // Подтягиваем громкость один раз из localStorage (если ещё не загружена)
   useEffect(() => {
-    const savedVolume = localStorage.getItem("volume");
-    if (savedVolume !== null) {
-      setVolume(parseFloat(savedVolume));
+    if (!player.volumeLoaded) {
+      player.loadVolume();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-let isSending = false;
+  const onPlay = (id: string) => {
+    if (lockRef.current) return;
+    lockRef.current = true;
 
-const onPlay = async (id: string) => {
-  if (isSending) return;
-  isSending = true;
+    try {
+      const isSame = player.activeId === id;
 
-  if (user?.id) {
-    await listenToSong(user.id, id);
-  }
+      if (isSame) {
+        // ← ЖЁСТКИЙ СТОП текущего трека
+        player.stop(); // isPlaying:false + activeId:undefined
+        return;
+      }
 
-  if (player.activeId === id) {
-    player.setId("");
-  } else {
-    player.setId(id);
-    player.setIds(songs.map(song => song.id));
-    player.loadVolume();
-    player.setVolume(volume);
-  }
+      // Новый трек: очередь + активный id
+      player.setIds(songs.map((s) => s.id));
+      player.setId(id); // включает isPlaying: true
 
-  isSending = false;
-};
+      // ГРОМКОСТЬ НЕ ТРОГАЕМ (уже в store, загружена выше).
 
-
+      // Аналитика — без await, чтобы не блокировать UX
+      if (user?.id) {
+        void listenToSong(user.id, id).catch(() => {});
+      }
+    } finally {
+      lockRef.current = false;
+    }
+  };
 
   return onPlay;
 };

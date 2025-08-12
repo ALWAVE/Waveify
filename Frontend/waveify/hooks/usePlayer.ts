@@ -51,7 +51,6 @@ const usePlayer = create<PlayerStore>((set, get) => ({
 
   setVolume: (volume: number) => {
     set({ volume });
-    // защита от SSR
     if (typeof window !== "undefined") {
       try {
         localStorage.setItem("volume", String(volume));

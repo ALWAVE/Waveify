@@ -9,12 +9,15 @@ import PageContent from "./PageContent";
 import PageContentTopChart from "../top-chart/PageContentTopChart";
 import PageContentForYou from "./PageContentForYou";
 import SmartLink from "@/component/SmartLink";
+import useGetSongById from "@/hooks/useGetSongById";
 import {
   StickyTabs,
   TabsHeader,
   useStickyProgress,
   Tab,
 } from "@/component/TabsHeader";
+import MyWave from "@/component/MyWave";
+import usePlayer from "@/hooks/usePlayer";
 
 const ALL_VIBES = ["Joyfully", "Energetic", "Quietly", "Sad"];
 
@@ -37,7 +40,7 @@ export default function Home() {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length) return parsed;
       }
-    } catch {}
+    } catch { }
     return ALL_VIBES;
   });
   useEffect(() => {
@@ -45,9 +48,11 @@ export default function Home() {
   }, [selectedVibes]);
 
   const { user } = useAuth();
+  const player = usePlayer();
   const { songs, isLoading, refresh } = useSongs(selectedVibes);
   const { songs: topSongs, isLoading: isTopLoading } = useTopChartSongs(20);
   const { songs: forYouSongs, isLoading: isForYouLoading } = useForYouSongs(user?.id);
+  const { song: playingSong } = useGetSongById(player.activeId);
   useEffect(() => refresh(), [selectedVibes]);
   /* ------------------------------------- */
 
@@ -63,9 +68,13 @@ export default function Home() {
   return (
     <div
       ref={scrollRef}
-      className="bg-[var(--bgPage)] text-neutral-400 rounded-lg w-full h-full overflow-y-auto md:pl-20 relative"
+      className="bg-[var(--bgPage)] text-neutral-400 rounded-lg w-full h-full overflow-y-auto relative"
     >
-      
+            <MyWave height={400} />
+
+
+
+
       {/* Поточная панель (не исчезает, только fade) */}
       <div
         className="px-4 pt-4 mb-2"
@@ -75,14 +84,14 @@ export default function Home() {
           transition: "opacity 0.25s ease-out",
         }}
       >
-        <TabsHeader tabs={tabs} activeKey={activeTab}   onChange={(key) => setActiveTab(key as "for-you" | "trends")} />
+        <TabsHeader tabs={tabs} activeKey={activeTab} onChange={(key) => setActiveTab(key as "for-you" | "trends")} />
       </div>
 
       {/* Фиксированная панель */}
       <StickyTabs
         tabs={tabs}
         activeKey={activeTab}
-         onChange={(key) => setActiveTab(key as "for-you" | "trends")}
+        onChange={(key) => setActiveTab(key as "for-you" | "trends")}
         progress={progress}
       />
 

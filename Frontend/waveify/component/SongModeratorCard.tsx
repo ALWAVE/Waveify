@@ -1,55 +1,58 @@
+"use client";
+
 import { Song } from "@/models/Song";
 import Link from "next/link";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
+import { apiFetch } from "@/libs/apiClient";
 
-
+// предполагаем значения enum: Pending=0, Approved=1, Rejected=2
+const Pending = 0;
+const Approved = 1;
+const Rejected = 2;
 
 interface Props {
   song: Song;
-  onStatusChange?: (newStatus: string) => void;
+  onStatusChange?: (newStatus: string) => void; // оставил совместимость
 }
+
+const statusToText = (s: number | string) => {
+  if (typeof s === "string") return s;
+  switch (s) {
+    case Pending: return "Pending";
+    case Approved: return "Approved";
+    case Rejected: return "Rejected";
+    default: return String(s);
+  }
+};
 
 const SongModerationCard: React.FC<Props> = ({ song, onStatusChange }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [status, setStatus] = useState(song.moderationStatus);
+  const [status, setStatus] = useState<number>(song.moderationStatus as unknown as number);
 
-  const updateStatus = async (newStatus: string) => {
+  const updateStatus = async (target: "Approved" | "Rejected") => {
     setLoading(true);
     setError(null);
 
     try {
-      let actionParam = "";
-      if (newStatus === "Published") {
-        actionParam = "approve";
-      } else if (newStatus === "Rejected") {
-        actionParam = "reject";
-      } else {
-        setError("Неверный статус");
-        setLoading(false);
-        return;
-      }
-
-      const res = await fetch(`http://77.94.203.78:5000/api/Moderator/${song.id}/moderate?action=${actionParam}`, {
+      const res = await apiFetch(`/api/Moderator/song/${song.id}/status`, {
         method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({}),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: target }),
       });
 
       if (!res.ok) {
-        const text = await res.text();
+        const text = await res.text().catch(() => "");
         throw new Error(text || "Ошибка при обновлении статуса");
       }
 
-      setStatus(Number(newStatus));
-      if (onStatusChange) onStatusChange(newStatus);
-      toast.success(`Успешно изменен статус на ${newStatus}`);
+      // обновляем локально enum-числом
+      setStatus(target === "Approved" ? Approved : Rejected);
+      onStatusChange?.(target);
+      toast.success(`Успешно изменён статус на ${target}`);
     } catch (e: any) {
-      setError(e.message || "Ошибка сети");
+      setError(e?.message || "Ошибка сети");
     } finally {
       setLoading(false);
     }
@@ -62,20 +65,19 @@ const SongModerationCard: React.FC<Props> = ({ song, onStatusChange }) => {
     setError(null);
 
     try {
-      const res = await fetch(`http://77.94.203.78:5000/Song/${song.id}`, {
+      const res = await apiFetch(`/Song/${song.id}`, {
         method: "DELETE",
-        credentials: "include",
       });
 
       if (!res.ok) {
-        const text = await res.text();
+        const text = await res.text().catch(() => "");
         throw new Error(text || "Ошибка при удалении песни");
       }
 
       toast.success("Песня успешно удалена");
-      if (onStatusChange) onStatusChange("Deleted"); // можно передавать специальный статус
+      onStatusChange?.("Deleted");
     } catch (e: any) {
-      setError(e.message || "Ошибка сети");
+      setError(e?.message || "Ошибка сети");
     } finally {
       setLoading(false);
     }
@@ -88,20 +90,20 @@ const SongModerationCard: React.FC<Props> = ({ song, onStatusChange }) => {
       <p className="text-sm text-gray-600">Автор: {song.author}</p>
       <p className="text-sm text-gray-600">Длительность: {song.duration}</p>
       <audio controls className="w-full mt-2" src={song.songPath} />
-      <p className="mt-2">Текущий статус: <b>{status}</b></p>
+      <p className="mt-2">Текущий статус: <b>{statusToText(status)}</b></p>
       <Link href={`/profile/${song.userId}`} className="text-neutral-500 hover:underline hover:text-white cursor-pointer transition">
         Ссылка на профиль автора
       </Link>
       {error && <p className="text-red-600 mt-2">Ошибка: {error}</p>}
 
-      {status === 0 && (
+      {status === Pending && (
         <div className="flex flex-wrap gap-4 mt-4">
           <button
             disabled={loading}
-            onClick={() => updateStatus("Published")}
+            onClick={() => updateStatus("Approved")}
             className="bg-green-600 text-white px-4 py-2 rounded hover:scale-95 disabled:opacity-50"
           >
-            Опубликовать
+            {loading ? "Обновляем..." : "Опубликовать"}
           </button>
           <button
             disabled={loading}
@@ -122,4 +124,5 @@ const SongModerationCard: React.FC<Props> = ({ song, onStatusChange }) => {
     </div>
   );
 };
+
 export default SongModerationCard;

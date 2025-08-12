@@ -13,6 +13,7 @@ import AuthPoster from "@/component/AuthPoster";
 import CookieConsent from "@/component/CookieConsent";
 import DisableContextMenu from "@/component/DisableContextMenu";
 import ElectronGate from "@/component/ElectronGate";
+import ClientRootShell from "@/component/ClientRootShell";
 
 
 const figtree = Inter({ subsets: ["latin"] })
@@ -48,26 +49,26 @@ export default function RootLayout({
         <DisableContextMenu />
         <ToasterProvider />
         <AuthProvider>
-
-          <ModalProvider />
-          <CookieConsent />
-          <div className="flex flex-col h-screen bg-[var(--bg)] ">
-            <Header />
-            <TitleBar />
-            <div className="flex flex-1 overflow-hidden">
-              <Sidebar />
-              <main className="flex-1 bg-[var(--bg)] h-[calc(100%-80px)] scroll-container overflow-y-auto pr-2 pl-2 relative z-0">
-                {children}
-              </main>
-            </div>
-            {/* <MobilePlayer />
+          <ClientRootShell >
+            <ModalProvider />
+            <CookieConsent />
+            <div className="flex flex-col h-screen bg-[var(--bg)] ">
+              <Header />
+              <TitleBar />
+              <div className="flex flex-1 overflow-hidden">
+                <Sidebar />
+                <main className="flex-1 bg-[var(--bg)] h-[calc(100%-80px)] scroll-container overflow-y-auto pr-2 pl-2 relative z-0">
+                  {children}
+                </main>
+              </div>
+              {/* <MobilePlayer />
             <MobileBar /> */}
 
-            <Player />
-            <AuthPoster />
-            {/* <FullScreenPlayer /> */}
-          </div>
-
+              <Player />
+              <AuthPoster />
+              {/* <FullScreenPlayer /> */}
+            </div>
+          </ClientRootShell>
         </AuthProvider>
 
       </body>

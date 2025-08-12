@@ -26,6 +26,7 @@ import { IoHeartOutline } from "react-icons/io5";
 import { MdFavorite } from "react-icons/md";
 import { useAuth } from "@/providers/AuthProvider"; // Импортируйте контекст авторизации
 import { LuChartNoAxesColumn } from "react-icons/lu";
+import useYouTubeImportModal from "@/hooks/useYouTubeImportModal";
 interface SidebarProps {
   children?: React.ReactNode;
 }
@@ -37,6 +38,7 @@ const Sidebar: React.FC<SidebarProps> = () => {
   const { favorites, loadFavorites } = useFavorites();
   const { showYourFile } = useLibrarySettings();
   const { user } = useAuth(); // Получите пользователя из контекста
+  const ytImportModal = useYouTubeImportModal();
 
   useEffect(() => {
     loadFavorites();
@@ -86,6 +88,12 @@ const Sidebar: React.FC<SidebarProps> = () => {
                     premium: true,
                   },
                   {
+                    label: "Create from YouTube",
+                    onClick: () => ytImportModal.onOpen(),
+                    description: "Импорт по ссылке (без скачивания файла)",
+                    iconItem: <LuYoutube size={26} />,
+                  },
+                  {
                     label: "Create Playlist",
                     href: user ? "/item1" : undefined, // Проверка авторизации
                     description: "Create playlist for your collection",
@@ -120,7 +128,7 @@ const Sidebar: React.FC<SidebarProps> = () => {
                   active={pathname === "/youtube-download"}
                   icon={<LuYoutube size={26} />}
                   iconActive={<LuYoutube size={26} />}
-                  href="/collection"
+                  href="/youtube-download"
                   positionToolTipe="right"
                   textColorActive="[var(--bg)]"
                 />
@@ -166,7 +174,7 @@ const Sidebar: React.FC<SidebarProps> = () => {
                 />
               )}
 
-            
+
             </div>
           </Box>
         </div>

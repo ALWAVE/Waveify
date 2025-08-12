@@ -6,6 +6,6 @@ export const useUserSongs = () => {
   return {
     songs: user?.songs ?? [],
     isLoading: !user,
-    refresh: () => {}, // если хочешь, можно потом обновление через fetchUser прокинуть
+    refresh: () => {},
   };
 };

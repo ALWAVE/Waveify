@@ -1,49 +1,47 @@
-﻿using Amazon;
-using Amazon.S3;
+﻿using Amazon.S3;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Net;
 using System.Text;
-using Waveify.API.Endpoints;
+
 using Waveify.API.Extensions;
 using Waveify.API.Settings;
 using Waveify.Application.Auth;
-
 using Waveify.Application.Interfaces.Repositories;
-//using Waveify.Application.Interfaces.Repositiories;
-//using Waveify.Application.Repositiories;
 using Waveify.Application.Services;
-using Waveify.Infrastructure;
+using Waveify.Infrastructure;            // JwtOptions
 using Waveify.Interface.Auth;
 using Waveify.Persistence;
 using Waveify.Persistence.Configurations;
 using Waveify.Persistence.Entities;
-using Waveify.Persistence.Repositiories;
+using Waveify.Persistence.Repositiories; // ImageProxyRepository (если у тебя так называется неймспейс)
 using Waveify.Persistence.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
-
-
 var configuration = builder.Configuration;
 
-// Add services to the container.
+// MVC/Controllers
 builder.Services.AddControllersWithViews();
+builder.Services.AddEndpointsApiExplorer();
 
+// Swagger
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Waveify API", Version = "v1" });
+    c.MapType<IFormFile>(() => new OpenApiSchema { Type = "string", Format = "binary" });
+});
 
+// ---------- JWT: одна секция, один объект опций ----------
+builder.Services.Configure<JwtOptions>(configuration.GetSection("JwtOptions"));
+var jwtOptions = configuration.GetSection("JwtOptions").Get<JwtOptions>();
 
+// ---------- DI: Services & Repositories ----------
 builder.Services.AddScoped<IJwtProvider, JwtProvider>();
 builder.Services.AddScoped<IPasswordHash, PasswordHash>();
-
 builder.Services.AddScoped<UserServices>();
-builder.Services.Configure<JwtOptions>(configuration.GetSection(nameof(JwtOptions)));
 
-builder.Services.AddAutoMapper(typeof(DataBaseMapping));
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddScoped<ISongReactionRepository, SongReactionRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IDrumKitServices, DrumKitServices>();
@@ -52,113 +50,83 @@ builder.Services.AddScoped<ISongRepositories, SongRepository>();
 builder.Services.AddScoped<ISubscribeRepository, SubscribeRepository>();
 builder.Services.AddScoped<ILikedSongsRepository, LikedSongsRepository>();
 builder.Services.AddScoped<IListeningHistoryRepository, ListeningHistoryRepository>();
-builder.Services.AddScoped<IEntityTypeConfiguration<LikedSongEntity>, LikedSongConfiguration>();
 builder.Services.AddScoped<IPlaylistRepository, PlaylistRepository>();
 builder.Services.AddScoped<IReportSongRepository, ReportSongRepository>();
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("JwtOptions"));
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Waveify API", Version = "v1" });
-    c.MapType<IFormFile>(() => new OpenApiSchema { Type = "string", Format = "binary" });
-});
+builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+builder.Services.AddScoped<IYouTubeService, YouTubeService>();
+// HttpClient для прокси изображений
 builder.Services.AddHttpClient<IImageProxyRepository, ImageProxyRepository>()
     .SetHandlerLifetime(TimeSpan.FromMinutes(5));
 
-builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
-builder.Services.AddScoped<RefreshTokenRepository>();
-builder.Services.Configure<S3Settings>(builder.Configuration.GetSection("S3"));
-builder.Services.AddScoped<IYouTubeService, YouTubeService>();
-builder.Services.AddSingleton<IAmazonS3>(sp =>
+// AutoMapper (один раз, сканируем сборку с профилем)
+builder.Services.AddAutoMapper(typeof(DataBaseMapping));
+builder.Services.AddAuthorization(options =>
 {
-    var s3Settings = sp.GetRequiredService<IOptions<S3Settings>>().Value;
-    var amazonS3Config = new AmazonS3Config
-    {
-        ServiceURL = s3Settings.ServiceUrl,
-        ForcePathStyle = false, // Отключение ForcePathStyle
-        //RegionEndpoint = RegionEndpoint.GetBySystemName(s3Settings.Region)
-    };
-
-    return new AmazonS3Client(s3Settings.AccessKey, s3Settings.SecretKey, amazonS3Config);
+    options.AddPolicy("ModeratorOnly", policy =>
+        policy.RequireRole("Moderator"));
 });
 
+// Аутентификация JWT (используем ТОТ ЖЕ jwtOptions)
+builder.Services.AddApiAuthentication(jwtOptions);
 
-
-builder.Services.AddSingleton<S3Service>();
-// Регистрируем IJwtProvider
-builder.Services.AddScoped<IJwtProvider, JwtProvider>();
-
-// Подключаем аутентификацию
-builder.Services.AddApiAuthentication(builder.Configuration.GetSection("JwtOptions").Get<JwtOptions>());
-
-
-builder.Services.Configure<JwtOptions>(configuration.GetSection(nameof(JwtOptions)));
-builder.Services.AddSingleton<JwtOptions>(sp =>
-    sp.GetRequiredService<IConfiguration>().GetSection(nameof(JwtOptions)).Get<JwtOptions>());
-
-
-
-
+// БД
 builder.Services.AddDbContext<WaveifyDbContext>(options =>
 {
-    options.UseNpgsql(builder.Configuration.GetConnectionString(nameof(WaveifyDbContext)));
+    options.UseNpgsql(configuration.GetConnectionString(nameof(WaveifyDbContext)));
 });
 
+// CORS: одна политика
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend", policy =>
+    options.AddPolicy("Frontend", policy =>
     {
-        policy.WithOrigins("http://77.94.203.78:3000") // только один origin!
+        policy.WithOrigins("http://localhost:3000", "http://77.94.203.78:3000")
               .AllowCredentials()
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
 });
 
+// S3
+builder.Services.Configure<S3Settings>(configuration.GetSection("S3"));
+builder.Services.AddSingleton<IAmazonS3>(sp =>
+{
+    var s3Settings = sp.GetRequiredService<IOptions<S3Settings>>().Value;
+    var amazonS3Config = new AmazonS3Config
+    {
+        ServiceURL = s3Settings.ServiceUrl,
+        ForcePathStyle = false,
+    };
+    return new AmazonS3Client(s3Settings.AccessKey, s3Settings.SecretKey, amazonS3Config);
+});
+builder.Services.AddSingleton<S3Service>();
+builder.Services.AddScoped<IYouTubeService, YouTubeService>();
 
 var app = builder.Build();
 
+// Swagger в Dev/Prod (как тебе удобнее)
 if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {
-
-    app.UseDeveloperExceptionPage();
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-//else
-//{
-//    app.UseExceptionHandler("/Home/Error");
-//    app.UseHsts();
-//}
-//app.UseHttpsRedirection();
-app.UseRouting();
-app.UseCors("AllowFrontend");
-app.UseAuthentication();
-app.UseAuthorization();
-app.MapControllers();
 
-//app.UseHttpsRedirection();
+// Пайплайн
+// app.UseHttpsRedirection(); // включай, когда перейдёшь на HTTPS
 app.UseStaticFiles();
 
+app.UseRouting();
 
-app.Use(async (context, next) =>
-{
-    var authHeader = context.Request.Headers["Authorization"].ToString();
-    Console.WriteLine($"Authorization Header: '{authHeader}'");
+app.UseCors("Frontend");
 
-    if (authHeader?.StartsWith("Bearer ") == true)
-    {
-        var token = authHeader.Substring("Bearer ".Length).Trim();
-        Console.WriteLine($"Extracted Token: '{token}'");
-    }
+app.UseAuthentication();
+app.UseAuthorization();
 
-    await next();
-});
+app.MapControllers();
 
-
+// Роут по умолчанию (если нужен)
 app.MapControllerRoute(
-    name: "default", 
+    name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
 app.Run();

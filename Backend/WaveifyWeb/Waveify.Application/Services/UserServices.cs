@@ -13,20 +13,23 @@ namespace Waveify.Application.Services
         private readonly IUserRepository _usersRepository;
         private readonly ISubscribeRepository _subscribeRepository;
         private readonly IJwtProvider _jwtProvider;
-        private readonly IRefreshTokenRepository _refreshTokenRepository; // 👈 Добавлено
+        private readonly IRefreshTokenRepository _refreshTokenRepository;
+        private readonly ISongRepositories _songRepository; // НОВОЕ
 
         public UserServices(
             IPasswordHash passwordHash,
             IUserRepository userRepository,
             ISubscribeRepository subscribeRepository,
             IJwtProvider jwtProvider,
-            IRefreshTokenRepository refreshTokenRepository) // 👈 Добавлено
+            IRefreshTokenRepository refreshTokenRepository,
+            ISongRepositories songRepository) // НОВОЕ
         {
             _passwordHasher = passwordHash;
             _usersRepository = userRepository;
             _subscribeRepository = subscribeRepository;
             _jwtProvider = jwtProvider;
-            _refreshTokenRepository = refreshTokenRepository; // 👈 Сохраняем зависимость
+            _refreshTokenRepository = refreshTokenRepository;
+            _songRepository = songRepository; // НОВОЕ
         }
 
         public async Task Register(string userName, string email, string password)
@@ -36,17 +39,32 @@ namespace Waveify.Application.Services
             await _usersRepository.Add(user);
         }
 
-        public string GenerateRefreshToken(Guid userId)
+        public async Task<string> GenerateRefreshToken(Guid userId)
         {
             var refreshToken = new RefreshToken
             {
                 Token = Guid.NewGuid().ToString(),
                 UserId = userId,
-                Expires = DateTime.UtcNow.AddDays(7) // токен должен иметь срок действия
+                Expires = DateTime.UtcNow.AddDays(7)
             };
 
-            _refreshTokenRepository.SaveAsync(refreshToken);
+            await _refreshTokenRepository.SaveAsync(refreshToken); // <-- было без await
             return refreshToken.Token;
+        }
+        public async Task<IReadOnlyList<Song>> GetMySongsAll(Guid userId, bool onlyPublished = false)
+        {
+            if (onlyPublished)
+                return await _songRepository.GetPublishedSongsByUserId(userId);
+
+            return await _songRepository.GetSongsByUserId(userId);
+        }
+
+     
+        public async Task<Subscription?> GetUserSubscription(Guid userId)
+        {
+            var user = await _usersRepository.GetById(userId);
+            if (user?.SubscriptionId == null) return null;
+            return await _subscribeRepository.GetSubscriptionById(user.SubscriptionId.Value);
         }
         public async Task<User?> GetUserByEmail(string email)
         {

@@ -32,7 +32,7 @@ namespace Waveify.API.Endpoints
                      HttpOnly = true, // Не доступен через JavaScript
                      Secure = false,   // Доступен только по HTTPS
                      SameSite = SameSiteMode.Lax, // Защита от CSRF
-                     Expires = DateTimeOffset.UtcNow.AddDays(7) // Время жизни куки
+                     Expires = DateTimeOffset.UtcNow.AddMinutes(15) // Время жизни куки
                  }
              );
             return Results.Ok(token);    

@@ -5,6 +5,7 @@ import { useRef, useState, useEffect } from "react"
 import useLoadImage from "@/hooks/useLoadImage"
 import usePlayer from "@/hooks/usePlayer"
 import { Song } from "@/models/Song"
+import Link from "next/link"
 
 interface MediaItemProps {
   data: Song
@@ -88,29 +89,35 @@ const MediaItem: React.FC<MediaItemProps> = ({ data, onClick }) => {
       onClick={handleClick}
       className="flex items-center gap-x-3 cursor-pointer hover:bg-[var(--bgPage)] w-full p-2 rounded-md min-w-0"
     >
-      <div className="relative rounded-md min-h-[48px] min-w-[48px] overflow-hidden">
+      <Link href={`/song/${data.id}`} className="relative rounded-md min-h-[48px] min-w-[48px] overflow-hidden">
         <Image
           fill
           src={imageUrl || "/images/liked.png"}
           alt="MediaItem"
           className="object-cover"
         />
-      </div>
+      </Link>
 
       <div className="flex flex-col gap-y-1 overflow-hidden max-w-[150px] sm:max-w-[200px] md:max-w-[250px]">
         <div ref={titleRef}>
+          <Link href={`/song/${data.id}`}>
           <MarqueeText
             text={data.title}
             isOverflowing={isTitleOverflowing}
-            className="text-[var(--text)] text-sm font-medium"
+            className="text-[var(--text)] text-sm font-medium hover:underline"
           />
+          </Link>
+          
         </div>
         <div ref={authorRef}>
+        
+          <Link href = {`/explore?query=${data.author}`}>
           <MarqueeText
             text={`${data.author}`}
             isOverflowing={isAuthorOverflowing}
-            className="text-neutral-400 text-sm"
-          />
+            className="text-neutral-400 text-sm hover:underline hover:text-[var(--text)]"
+          /></Link>
+          
         </div>
       </div>
     </div>

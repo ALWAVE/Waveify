@@ -33,7 +33,18 @@ namespace Waveify.Persistence
             CreateMap<Subscription, SubscribeEntity>().ReverseMap();
             CreateMap<Tag, Tag>();
             CreateMap<LikedSong, LikedSongEntity>();
-            CreateMap<RefreshToken, RefreshTokenEntity>();
+            CreateMap<RefreshTokenEntity, RefreshToken>()
+             .ForMember(d => d.Token, m => m.MapFrom(s => s.Token))
+             .ForMember(d => d.UserId, m => m.MapFrom(s => s.UserId))
+             .ForMember(d => d.Expires, m => m.MapFrom(s => s.Expires))
+             .ForMember(d => d.IsRevoked, m => m.MapFrom(s => s.IsRevoked));
+
+            // domain -> entity
+            CreateMap<RefreshToken, RefreshTokenEntity>()
+                .ForMember(d => d.Token, m => m.MapFrom(s => s.Token))
+                .ForMember(d => d.UserId, m => m.MapFrom(s => s.UserId))
+                .ForMember(d => d.Expires, m => m.MapFrom(s => s.Expires))
+                .ForMember(d => d.IsRevoked, m => m.MapFrom(s => s.IsRevoked));
             CreateMap<Playlist, PlaylistEntity>().ReverseMap();
             CreateMap<PlaylistEntity, Playlist>().ReverseMap();
             CreateMap<SongEntity, Song>();

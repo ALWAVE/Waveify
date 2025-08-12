@@ -113,11 +113,12 @@ namespace Waveify.Persistence.Repositiories
         {
             var userEntity = await _context.Users
                 .AsNoTracking()
-                 .Include(u => u.Subscription)
+                .Include(u => u.Subscription)   // <-- обязательно
                 .FirstOrDefaultAsync(u => u.Id == id);
 
             return userEntity == null ? null : _mapper.Map<User>(userEntity);
         }
+
         public async Task<List<Song>> GetSongsByUserId(Guid userId)
         {
             var songEntities = await _context.Songs
@@ -144,6 +145,14 @@ namespace Waveify.Persistence.Repositiories
                 .ToList();
 
             return _mapper.Map<List<Song>>(songs); // Используем AutoMapper
+        }
+        public async Task<RefreshToken?> GetByTokenAsync(string token)
+        {
+            var entity = await _context.RefreshTokens
+                .AsNoTracking()
+                .FirstOrDefaultAsync(rt => rt.Token == token && !rt.IsRevoked);
+
+            return entity == null ? null : _mapper.Map<RefreshToken>(entity);
         }
 
     }
