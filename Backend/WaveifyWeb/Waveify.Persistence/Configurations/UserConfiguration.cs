@@ -12,7 +12,8 @@ namespace Waveify.Persistence.Configurations
             builder.Property(b => b.UserName).IsRequired();
             builder.Property(b => b.Email).IsRequired();
             builder.Property(b => b.PasswordHash).IsRequired();
-
+            builder.Property(b => b.EmailConfirmed).HasDefaultValue(false);
+            builder.Property(b => b.EmailConfirmationTokenHash).HasMaxLength(200);
             builder.HasOne(u => u.Subscription)
                    .WithMany()
                    .HasForeignKey(u => u.SubscriptionId)

@@ -35,28 +35,15 @@ namespace Waveify.Persistence.Repositiories
         public async Task Add(User user)
         {
             if (await UserNameExists(user.UserName))
-            {
                 throw new ArgumentException("Пользователь с таким UserName уже существует!");
-
-            }
             if (await EmailExists(user.Email))
-            {
-                throw new ArgumentException(
-                    "Пользователь с таким Email уже существует!");
-            }
+                throw new ArgumentException("Пользователь с таким Email уже существует!");
 
-            var userEntity = new UserEntity()
-            {
-                Id = user.Id,
-                UserName = user.UserName,
-                PasswordHash = user.PasswordHash,
-                Email = user.Email
-            };
-
+            // ВАЖНО: маппим весь агрегат, чтобы EmailConfirmation попал в Entity
+            var userEntity = _mapper.Map<UserEntity>(user);
 
             await _context.Users.AddAsync(userEntity);
             await _context.SaveChangesAsync();
-
         }
         public async Task<User> GetByEmail(string email)
         {
@@ -95,9 +82,7 @@ namespace Waveify.Persistence.Repositiories
         {
             var userEntity = await _context.Users.FindAsync(user.Id);
             if (userEntity == null)
-            {
                 throw new Exception("User not found");
-            }
 
             userEntity.UserName = user.UserName;
             userEntity.PasswordHash = user.PasswordHash;
@@ -106,6 +91,12 @@ namespace Waveify.Persistence.Repositiories
             userEntity.SubscriptionStart = user.SubscriptionStart;
             userEntity.SubscriptionEnd = user.SubscriptionEnd;
             userEntity.Role = user.Role.ToString();
+
+            // ✨ переноcим состояние подтверждения e-mail
+            userEntity.EmailConfirmed = user.EmailConfirmation.IsConfirmed;
+            userEntity.EmailConfirmationTokenHash = user.EmailConfirmation.TokenHash;
+            userEntity.EmailConfirmationExpiresUtc = user.EmailConfirmation.ExpiresAtUtc;
+
             await _context.SaveChangesAsync();
         }
 

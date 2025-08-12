@@ -1,5 +1,6 @@
 ﻿using Amazon.S3;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -54,6 +55,8 @@ builder.Services.AddScoped<IPlaylistRepository, PlaylistRepository>();
 builder.Services.AddScoped<IReportSongRepository, ReportSongRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<IYouTubeService, YouTubeService>();
+builder.Services.Configure<SmtpOptions>(configuration.GetSection("Smtp"));
+builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 // HttpClient для прокси изображений
 builder.Services.AddHttpClient<IImageProxyRepository, ImageProxyRepository>()
     .SetHandlerLifetime(TimeSpan.FromMinutes(5));

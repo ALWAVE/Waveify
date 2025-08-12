@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using Microsoft.Extensions.Configuration;
+using System.Data;
 using System.Security.Cryptography;
 using Waveify.Application.Auth;
 using Waveify.Application.Interfaces.Repositories;
@@ -16,29 +17,61 @@ namespace Waveify.Application.Services
         private readonly IRefreshTokenRepository _refreshTokenRepository;
         private readonly ISongRepositories _songRepository; // НОВОЕ
 
+        private readonly IEmailSender _emailSender;
+        private readonly IConfiguration _cfg;
+
         public UserServices(
             IPasswordHash passwordHash,
             IUserRepository userRepository,
             ISubscribeRepository subscribeRepository,
             IJwtProvider jwtProvider,
             IRefreshTokenRepository refreshTokenRepository,
-            ISongRepositories songRepository) // НОВОЕ
+            ISongRepositories songRepository,
+            IEmailSender emailSender,
+            IConfiguration cfg)
         {
             _passwordHasher = passwordHash;
             _usersRepository = userRepository;
             _subscribeRepository = subscribeRepository;
             _jwtProvider = jwtProvider;
             _refreshTokenRepository = refreshTokenRepository;
-            _songRepository = songRepository; // НОВОЕ
+            _songRepository = songRepository;
+            _emailSender = emailSender;
+            _cfg = cfg;
         }
-
         public async Task Register(string userName, string email, string password)
         {
             var hashedPassword = _passwordHasher.Generate(password);
-            var user = User.Create(Guid.NewGuid(), userName, email, hashedPassword);
-            await _usersRepository.Add(user);
-        }
 
+            // 1) генерим токен
+            var token = GenerateUrlSafeToken(32);
+            var tokenHash = EmailConfirmation.ComputeSha256(token);
+            var expires = DateTime.UtcNow.AddHours(24);
+
+            // 2) создаём пользователя и ставим pending
+            var user = User.Create(Guid.NewGuid(), userName, email, hashedPassword);
+            user.SetEmailConfirmationPending(tokenHash, expires);
+
+            // 3) сохраняем
+            await _usersRepository.Add(user);
+
+            // 4) собираем ссылку и шлём письмо
+            var frontendBaseUrl = _cfg["Frontend:BaseUrl"] ?? "http://localhost:3000";
+            var confirmUrl =
+                $"{frontendBaseUrl}/confirm-email?email={Uri.EscapeDataString(email)}&token={Uri.EscapeDataString(token)}";
+
+            var html = $@"
+                <p>Привет, {System.Net.WebUtility.HtmlEncode(userName)}!</p>
+                <p>Для подтверждения e-mail перейди по ссылке (действует 24 часа):</p>
+                <p><a href=""{confirmUrl}"">Подтвердить e-mail</a></p>";
+
+            await _emailSender.SendAsync(email, "Подтверждение e-mail — Waveify", html);
+        }
+        private static string GenerateUrlSafeToken(int bytesLen = 32)
+        {
+            var bytes = System.Security.Cryptography.RandomNumberGenerator.GetBytes(bytesLen);
+            return Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+        }
         public async Task<string> GenerateRefreshToken(Guid userId)
         {
             var refreshToken = new RefreshToken
@@ -105,19 +138,33 @@ namespace Waveify.Application.Services
         public async Task<string> Login(string email, string password)
         {
             var user = await _usersRepository.GetByEmail(email);
-            if (user == null)
-            {
-                throw new InvalidOperationException("User not found.");
-            }
+            if (user == null) throw new InvalidOperationException("User not found.");
+
+            if (!user.EmailConfirmation.IsConfirmed)
+                throw new InvalidOperationException("E-mail не подтвержден. Проверьте почту.");
 
             var result = _passwordHasher.Verify(password, user.PasswordHash);
-            if (!result)
-            {
-                throw new InvalidOperationException("Invalid password.");
-            }
+            if (!result) throw new InvalidOperationException("Invalid password.");
 
             var token = _jwtProvider.GenerateToken(user);
             return token;
+        }
+
+        public async Task<bool> ConfirmEmail(string email, string token)
+        {
+            var user = await _usersRepository.GetByEmail(email);
+            if (user == null) return false;
+
+            try
+            {
+                user.ConfirmEmail(token);     // вызывает EmailConfirmation.Confirm()
+                await _usersRepository.Update(user);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public async Task<User?> GetUserById(Guid userId)
@@ -188,6 +235,29 @@ namespace Waveify.Application.Services
             return user.Role == User.UserRole.Moderator; // если enum
                                                 // или: return user.Role == "Moderator"; // если строка
                                                 // или: return user.Role == 3; // если int
+        }
+        public async Task ResendConfirmationEmail(string email)
+        {
+            var user = await _usersRepository.GetByEmail(email);
+            if (user == null) return; // не раскрываем наличие аккаунта
+            if (user.EmailConfirmation.IsConfirmed) return;
+
+            var token = GenerateUrlSafeToken(32);
+            var tokenHash = EmailConfirmation.ComputeSha256(token);
+            var expires = DateTime.UtcNow.AddHours(24);
+
+            user.SetEmailConfirmationPending(tokenHash, expires);
+            await _usersRepository.Update(user);
+
+            var frontendBaseUrl = _cfg["Frontend:BaseUrl"] ?? "http://77.94.203.78/:3000";
+            var confirmUrl =
+                $"{frontendBaseUrl}/confirm-email?email={Uri.EscapeDataString(email)}&token={Uri.EscapeDataString(token)}";
+
+            var html = $@"
+        <p>Для подтверждения e-mail перейдите по ссылке (действует 24 часа):</p>
+        <p><a href=""{confirmUrl}"">Подтвердить e-mail</a></p>";
+
+            await _emailSender.SendAsync(email, "Подтверждение e-mail — Waveify", html);
         }
 
     }

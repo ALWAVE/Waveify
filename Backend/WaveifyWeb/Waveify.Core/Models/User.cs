@@ -37,15 +37,37 @@ namespace Waveify.Core.Models
 
         public DateTime? SubscriptionStart { get; set; } // Дата начала подписки
         public DateTime? SubscriptionEnd { get; set; } // Дата окончания подписки
-     
+        public EmailConfirmation EmailConfirmation { get; private set; } = default!;
         public UserRole Role { get; private set; } = UserRole.User;
         public void SetRole(UserRole role)
         {
             Role = role;
         }
-        public static User Create(Guid id, string username, string email, string passwordHash)
-        {
-            return new User(id, username, email, passwordHash, null, null, null);
-        }
+        public static User Create(Guid id, string username, string email, string passwordHash) =>
+           new(id, username, email, passwordHash, null, null, null)
+           {
+               // по умолчанию не подтвердён; токен выставит сервис регистрации
+               EmailConfirmation = EmailConfirmation.CreatePending(tokenHash: "", expiresAtUtc: DateTime.UtcNow) // будет перезаписано
+           };
+
+        public static User CreateWithEmailPending(Guid id, string username, string email, string passwordHash,
+                                                  string tokenHash, DateTime expiresAtUtc) =>
+            new(id, username, email, passwordHash, null, null, null)
+            {
+                EmailConfirmation = EmailConfirmation.CreatePending(tokenHash, expiresAtUtc)
+            };
+
+        public void MarkEmailConfirmed()
+       => EmailConfirmation = EmailConfirmation.CreateConfirmed();
+
+        public void SetEmailConfirmationPending(string? tokenHash, DateTime? expiresAtUtc)
+            => EmailConfirmation = EmailConfirmation.CreatePending(
+                tokenHash ?? string.Empty,
+                expiresAtUtc ?? DateTime.UtcNow
+            );
+
+        public void ConfirmEmail(string token) => EmailConfirmation.Confirm(token);
+
+
     }
 }

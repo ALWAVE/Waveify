@@ -10,6 +10,7 @@ using Waveify.Application.Services;
 using Waveify.Core.Models;
 using Waveify.Infrastructure;
 using Waveify.Interface.Auth;
+using Waveify.Persistence.Repositiories;
 using Waveify.Persistence.Repositories;
 namespace Waveify.API.Controllers
 {
@@ -17,21 +18,32 @@ namespace Waveify.API.Controllers
     [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
+        public record ConfirmEmailRequest(string Email, string Token);
+        public record ResendConfirmationRequest(string Email);
         private readonly UserServices _userServices;
         private readonly IRefreshTokenRepository _refreshTokenRepository;
         private readonly IJwtProvider _jwtProvider;
         private readonly ISongRepositories _songRepo;
+        private readonly IUserRepository _usersRepository;
+        private readonly IEmailSender _emailSender;
+        private readonly IConfiguration _configuration;
+
         public UserController(
-        UserServices userServices,
-        IRefreshTokenRepository refreshTokenRepository,
-        IJwtProvider jwtProvider,
-        ISongRepositories songRepo // <-- ИНТЕРФЕЙС, не SongRepository
-    )
+            UserServices userServices,
+            IRefreshTokenRepository refreshTokenRepository,
+            IJwtProvider jwtProvider,
+            ISongRepositories songRepo,
+            IUserRepository usersRepository,
+            IEmailSender emailSender,
+            IConfiguration configuration)
         {
             _userServices = userServices;
             _refreshTokenRepository = refreshTokenRepository;
             _jwtProvider = jwtProvider;
-            _songRepo = songRepo; // если используешь
+            _songRepo = songRepo;
+            _usersRepository = usersRepository;
+            _emailSender = emailSender;
+            _configuration = configuration;
         }
 
         [HttpPost("register")]
@@ -72,6 +84,27 @@ namespace Waveify.API.Controllers
 
             return Ok(new { message = "Logged in successfully" });
         }
+        [HttpPost("confirm-email")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailRequest req)
+        {
+            var ok = await _userServices.ConfirmEmail(req.Email, req.Token);
+            return ok ? Ok(new { message = "E-mail подтвержден" })
+                      : BadRequest(new { message = "Неверный или истекший токен" });
+        }
+
+        [HttpPost("resend-confirmation")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ResendConfirmation([FromBody] ResendConfirmationRequest req)
+        {
+            await _userServices.ResendConfirmationEmail(req.Email);
+            return Ok(new { message = "Письмо отправлено" });
+        }
+        private static string GenerateUrlSafeToken(int bytesLen = 32)
+        {
+            var bytes = System.Security.Cryptography.RandomNumberGenerator.GetBytes(bytesLen);
+            return Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+        }
 
         [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetById(Guid id)
@@ -106,8 +139,8 @@ namespace Waveify.API.Controllers
         [HttpGet("me")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> GetCurrentUser(
-      [FromServices] ISongRepositories songRepo,
-      [FromQuery] bool onlyPublished = false)
+        [FromServices] ISongRepositories songRepo,
+        [FromQuery] bool onlyPublished = false)
         {
             var userIdClaim = User.FindFirst("userId");
             if (userIdClaim == null) return Unauthorized();

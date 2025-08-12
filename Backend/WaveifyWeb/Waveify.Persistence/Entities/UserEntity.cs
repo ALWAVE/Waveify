@@ -25,5 +25,9 @@ namespace Waveify.Persistence.Entities
         public DateTime? SubscriptionStart { get; set; }
         public DateTime? SubscriptionEnd { get; set; }
         public string Role { get; set; } = "User";
+
+        public bool EmailConfirmed { get; set; }
+        public string? EmailConfirmationTokenHash { get; set; }
+        public DateTime? EmailConfirmationExpiresUtc { get; set; }
     }
 }

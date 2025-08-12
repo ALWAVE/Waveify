@@ -1,70 +1,82 @@
 ﻿using System;
+using System.Collections.Generic;
 using AutoMapper;
 using Waveify.Core.Models;
 using Waveify.Persistence.Entities;
-using Waveify.Core.Enums;
+
 namespace Waveify.Persistence
 {
     public class DataBaseMapping : Profile
     {
         public DataBaseMapping()
         {
-            // Настройка маппинга между сущностями и моделями
-            CreateMap<UserEntity, User>(); // Пример маппинга для UserEntity и User
+            // ---------- USER ----------
+            // Entity -> Domain
+            CreateMap<UserEntity, User>()
+                .ConstructUsing(src => User.Create(src.Id, src.UserName, src.Email, src.PasswordHash))
+                .AfterMap((src, dest) =>
+                {
+                    dest.SetRole(ParseRole(src.Role));
 
-            // Настройка маппинга для SongEntity -> Song
-            CreateMap<SongEntity, Song>()
-                
-                  .ForMember(dest => dest.Tags, opt => opt.NullSubstitute(new List<Tag>()));
-            CreateMap<SongEntity, Song>()
-                .ForCtorParam("user", opt => opt.MapFrom(src => src.User));
+                    if (src.EmailConfirmed)
+                    {
+                        dest.MarkEmailConfirmed(); // ✅ вместо присваивания свойства
+                    }
+                    else
+                    {
+                        dest.SetEmailConfirmationPending(
+                            src.EmailConfirmationTokenHash,
+                            src.EmailConfirmationExpiresUtc
+                        ); // ✅ вместо присваивания свойства
+                    }
+                });
 
-            // Настройка маппинга для UserEntity -> Guid
-            CreateMap<UserEntity, Guid>()
-                .ConvertUsing(src => src.Id);
             CreateMap<User, UserEntity>()
-                .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.Role.ToString()));
+                .ForMember(e => e.Role, opt => opt.MapFrom(d => d.Role.ToString()))
+                .ForMember(e => e.EmailConfirmed, opt => opt.MapFrom(d => d.EmailConfirmation.IsConfirmed))
+                .ForMember(e => e.EmailConfirmationTokenHash, opt => opt.MapFrom(d => d.EmailConfirmation.TokenHash))
+                .ForMember(e => e.EmailConfirmationExpiresUtc, opt => opt.MapFrom(d => d.EmailConfirmation.ExpiresAtUtc));
 
-            
 
-            CreateMap<User, UserEntity>()
-                .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.Role.ToString()));
+            // Иногда удобно иметь прямую проекцию UserEntity -> Guid (Id)
+            CreateMap<UserEntity, Guid>().ConvertUsing(src => src.Id);
 
-            CreateMap<Subscription, SubscribeEntity>().ReverseMap();
-            CreateMap<Tag, Tag>();
-            CreateMap<LikedSong, LikedSongEntity>();
+            // ---------- SONG ----------
+            // Убрал дубли — оставляем один раз.
+            CreateMap<SongEntity, Song>()
+                .ForMember(dest => dest.Tags, opt => opt.NullSubstitute(new List<Tag>()));
+
+            CreateMap<Song, SongEntity>().ReverseMap();
+
+            // ---------- SUBSCRIPTION ----------
+            CreateMap<SubscribeEntity, Subscription>().ReverseMap();
+
+            // ---------- REFRESH TOKEN ----------
             CreateMap<RefreshTokenEntity, RefreshToken>()
-             .ForMember(d => d.Token, m => m.MapFrom(s => s.Token))
-             .ForMember(d => d.UserId, m => m.MapFrom(s => s.UserId))
-             .ForMember(d => d.Expires, m => m.MapFrom(s => s.Expires))
-             .ForMember(d => d.IsRevoked, m => m.MapFrom(s => s.IsRevoked));
+                .ForMember(d => d.Token, m => m.MapFrom(s => s.Token))
+                .ForMember(d => d.UserId, m => m.MapFrom(s => s.UserId))
+                .ForMember(d => d.Expires, m => m.MapFrom(s => s.Expires))
+                .ForMember(d => d.IsRevoked, m => m.MapFrom(s => s.IsRevoked));
 
-            // domain -> entity
             CreateMap<RefreshToken, RefreshTokenEntity>()
                 .ForMember(d => d.Token, m => m.MapFrom(s => s.Token))
                 .ForMember(d => d.UserId, m => m.MapFrom(s => s.UserId))
                 .ForMember(d => d.Expires, m => m.MapFrom(s => s.Expires))
                 .ForMember(d => d.IsRevoked, m => m.MapFrom(s => s.IsRevoked));
-            CreateMap<Playlist, PlaylistEntity>().ReverseMap();
+
+            // ---------- PLAYLIST / REACTIONS / REPORTS ----------
             CreateMap<PlaylistEntity, Playlist>().ReverseMap();
-            CreateMap<SongEntity, Song>();
             CreateMap<SongReactionEntity, SongReaction>();
             CreateMap<ReportSongEntity, ReportSong>();
-            CreateMap<SongEntity, Song>()
-               .ForCtorParam("user", opt => opt.MapFrom(src => src.User))
-               .ForMember(dest => dest.Tags, opt => opt.NullSubstitute(new List<Tag>()));
-
-
-            CreateMap<Song, SongEntity>()
-           .ReverseMap();
-        
+            // Если Tag у тебя одна и та же модель для домена и персистенса — маппинг не нужен.
+            // Если есть TagEntity — замени на CreateMap<TagEntity, Tag>().ReverseMap();
         }
+
         private static User.UserRole ParseRole(string? role)
         {
             return Enum.TryParse<User.UserRole>(role, out var parsedRole)
                 ? parsedRole
                 : User.UserRole.User;
         }
-
     }
 }
